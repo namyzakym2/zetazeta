@@ -1,0 +1,1 @@
+function parseAmount(value){if(value==null)return null;const m=String(value).trim().replace(/,/g,'').match(/^(\d+(?:\.\d+)?)([kmbt])?$/i);if(!m)return null;const n=Number(m[1]);const mul={k:1e3,m:1e6,b:1e9,t:1e12}[String(m[2]||'').toLowerCase()]||1;const a=n*mul;return Number.isSafeInteger(a)&&a>0?a:null}module.exports={parseAmount};
