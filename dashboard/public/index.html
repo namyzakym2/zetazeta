@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#f3f6fc" />
+  <title>ZETA — لوحة التحكم</title>
+  <link rel="icon" href="/dashboard/images/logo.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="stylesheet" href="/dashboard/css/style.css" />
+  <link rel="stylesheet" href="/dashboard/css/vx.css" />
+</head>
+<body class="vx-body">
+  <div id="vx">
+    <a class="vx-skip" href="#app">تخطي إلى المحتوى</a>
+
+    <div class="vx-shell">
+      <!-- ================= Sidebar ================= -->
+      <aside class="vx-side" id="vxSide" aria-label="القائمة الرئيسية">
+        <div class="vx-brand">
+          <div class="vx-logo"><img src="/dashboard/images/logo.png" alt="ZETA" /></div>
+          <div class="vx-brand-copy"><b>ZETA</b><small>Discord Bot</small></div>
+          <button class="vx-icon-btn vx-close" id="vxClose" type="button" aria-label="إغلاق القائمة" data-icon="x"></button>
+        </div>
+
+        <div class="vx-srv" id="serverPicker">
+          <button class="vx-srv-btn" id="serverPickerBtn" type="button" aria-haspopup="listbox">
+            <span class="vx-srv-icon"><img id="serverPickerImg" src="/dashboard/images/logo.png" alt="" /></span>
+            <span class="vx-srv-copy"><b id="activeServerName">اختر السيرفر</b><small id="guildLabel">إدارة سيرفرك</small></span>
+            <span class="vx-srv-chev" data-icon="chevronDown"></span>
+          </button>
+          <div class="vx-srv-menu" id="serverPickerMenu" role="listbox"></div>
+        </div>
+
+        <label class="vx-navsearch">
+          <span data-icon="search"></span>
+          <input id="navSearch" placeholder="ابحث في الإعدادات..." autocomplete="off" aria-label="بحث في القائمة" />
+        </label>
+
+        <nav class="vx-nav" id="categoryNav" aria-label="الأقسام"></nav>
+
+        <div class="vx-side-foot">
+          <div class="vx-premium-mini">
+            <img class="vx-ico vx-ico-lg" src="/dashboard/images/icons/v.png" alt="" />
+            <b>ZETA Premium</b>
+            <small>استمتع بجميع المميزات بدون حدود</small>
+            <button class="vx-btn vx-btn-primary vx-btn-block" type="button" data-vx-soon>ترقية الآن</button>
+          </div>
+          <div class="vx-side-meta">
+            <a class="vx-back" href="/dashboard/profile.html"><span data-icon="arrowLeft"></span> سيرفراتي</a>
+            <span>ZETA v9.0.0</span>
+            <span class="vx-made">Made with <i data-icon="heart"></i> by ZETA Team</span>
+          </div>
+        </div>
+      </aside>
+      <div class="vx-scrim" id="vxScrim"></div>
+
+      <!-- ================= Main ================= -->
+      <div class="vx-main">
+        <header class="vx-top">
+          <button class="vx-icon-btn vx-burger" id="vxBurger" type="button" aria-label="فتح القائمة" data-icon="menu"></button>
+          <div class="vx-top-brand"><span class="vx-logo"><img src="/dashboard/images/logo.png" alt="" /></span>ZETA</div>
+
+          <button class="vx-search" id="globalSearch" type="button" aria-label="بحث سريع">
+            <span data-icon="search"></span>
+            <span class="vx-search-ph">ابحث عن أي شيء...</span>
+            <kbd>Ctrl + K</kbd>
+          </button>
+
+          <div class="vx-bell-wrap">
+            <button class="vx-icon-btn" id="vxBell" type="button" aria-label="الإشعارات" aria-expanded="false">
+              <span data-icon="bell"></span>
+              <i class="vx-bell-count" id="vxBellCount" hidden>0</i>
+            </button>
+            <div class="vx-bell-menu" id="vxBellMenu" hidden></div>
+          </div>
+
+          <a href="/dashboard/profile.html" class="vx-profile" id="topbarAvatar" title="ملفي الشخصي">
+            <img id="topbarAvatarImg" src="/dashboard/images/logo.png" alt="" />
+            <span class="vx-profile-copy"><b id="topbarUserName">المستخدم</b><small id="topbarUserRole">Owner</small></span>
+            <span class="vx-profile-chev" data-icon="chevronDown"></span>
+          </a>
+        </header>
+
+        <main class="vx-app" id="app" tabindex="-1"></main>
+      </div>
+    </div>
+
+    <!-- Mobile tab bar -->
+    <nav class="vx-tabbar" aria-label="تنقل سريع">
+      <button type="button" data-tab="overview" data-vx-tab="overview"><img class="vx-ico" src="/dashboard/images/icons/vhex.png" alt="" />الرئيسية</button>
+      <button type="button" data-tab="shield" data-vx-tab="shield"><img class="vx-ico" src="/dashboard/images/icons/shield.png" alt="" />الحماية</button>
+      <button type="button" id="vxTabMore"><img class="vx-ico" src="/dashboard/images/icons/gear.png" alt="" />القائمة</button>
+    </nav>
+
+    <!-- Command palette -->
+    <div class="vx-pal" id="vxPalette" hidden role="dialog" aria-modal="true" aria-label="بحث سريع">
+      <div class="vx-pal-back" data-pal-close></div>
+      <div class="vx-pal-box">
+        <div class="vx-pal-input">
+          <span data-icon="search"></span>
+          <input id="vxPalInput" placeholder="اكتب اسم القسم أو الإعداد..." autocomplete="off" />
+          <kbd>Esc</kbd>
+        </div>
+        <div class="vx-pal-list" id="vxPalList" role="listbox"></div>
+      </div>
+    </div>
+
+    <div class="vx-toast" id="vxToast" role="status" aria-live="polite"></div>
+  </div>
+
+    <script src="/dashboard/js/devilTrigger.js"></script>
+  <script src="/dashboard/js/imageUpload.js"></script>
+  <script src="/dashboard/js/icons.js"></script>
+  <script src="/dashboard/js/vx.js"></script>
+  <script src="/dashboard/js/main.js"></script>
+</body>
+</html>

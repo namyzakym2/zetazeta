@@ -1,0 +1,47 @@
+{
+  "credit.title": "😈 DEVIL CREDIT",
+  "credit.user": "👤 User",
+  "credit.balance": "🪙 DC",
+  "credit.streak": "🔥 Daily Streak",
+  "credit.days": "Days",
+  "credit.transfer.success": "💸 Transferred {amount} to {user}",
+  "credit.transfer.self": "❌ You cannot transfer DC to yourself.",
+  "credit.transfer.bot": "❌ You cannot transfer DC to a bot.",
+  "credit.transfer.insufficient": "❌ Your balance is insufficient for this transfer.",
+  "credit.transfer.invalidAmount": "❌ Amount must be a positive number.",
+
+  "daily.title": "🎁 DAILY REWARD",
+  "daily.received": "You received",
+  "daily.streak": "🔥 Streak",
+  "daily.balance": "🪙 Balance",
+  "daily.alreadyClaimed": "⏳ You already claimed your daily reward. Try again in {time}.",
+
+  "vote.title": "🗳️ ZETA VOTE",
+  "vote.description": "Vote for ZETA to receive:",
+  "vote.button": "Vote Now",
+  "vote.alreadyVoted": "You've already voted. You can vote again in 12 hours.",
+
+  "speak.title": "📊 ZETA ACTIVITY",
+  "speak.level": "📈 Level",
+  "speak.xp": "✨ XP",
+  "speak.messages": "💬 Messages",
+  "speak.activeSince": "📅 Active Since",
+  "speak.days": "Days",
+  "speak.lastActive": "🔥 Last Active",
+  "speak.rank": "🏆 Activity Rank",
+  "speak.noRewards": "⚠️ Activity rewards: NONE",
+
+  "leaderboard.title": "🏆 ACTIVITY LEADERBOARD",
+
+  "welcome.title": "👋 Welcome!",
+  "leave.title": "👋 Goodbye",
+
+  "ticket.panelButton": "Open Ticket",
+  "ticket.alreadyOpen": "❌ You already have an open ticket, max allowed is {max}.",
+  "ticket.closed": "🔒 Ticket closed.",
+  "ticket.claimed": "👤 Ticket claimed by {user}",
+
+  "warn.logged": "⚠️ {user} has been warned",
+  "noPermission": "❌ You don't have permission to run this command.",
+  "guildOnly": "❌ This command only works inside a server."
+}

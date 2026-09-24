@@ -1,0 +1,47 @@
+{
+  "credit.title": "😈 DEVIL CREDIT",
+  "credit.user": "👤 User",
+  "credit.balance": "🪙 DC",
+  "credit.streak": "🔥 Daily Streak",
+  "credit.days": "أيام",
+  "credit.transfer.success": "💸 تم تحويل {amount} إلى {user}",
+  "credit.transfer.self": "❌ لا يمكنك تحويل الرصيد لنفسك.",
+  "credit.transfer.bot": "❌ لا يمكن التحويل إلى بوت.",
+  "credit.transfer.insufficient": "❌ رصيدك غير كافٍ لإتمام هذا التحويل.",
+  "credit.transfer.invalidAmount": "❌ يجب أن يكون المبلغ رقمًا موجبًا.",
+
+  "daily.title": "🎁 DAILY REWARD",
+  "daily.received": "حصلت على",
+  "daily.streak": "🔥 Streak",
+  "daily.balance": "🪙 Balance",
+  "daily.alreadyClaimed": "⏳ لقد استلمت مكافأتك اليومية بالفعل. حاول مرة أخرى بعد {time}.",
+
+  "vote.title": "🗳️ ZETA VOTE",
+  "vote.description": "صوّت لـ ZETA لتحصل على:",
+  "vote.button": "Vote Now",
+  "vote.alreadyVoted": "لقد قمت بالتصويت مسبقًا. يمكنك التصويت مرة أخرى بعد 12 ساعة.",
+
+  "speak.title": "📊 ZETA ACTIVITY",
+  "speak.level": "📈 Level",
+  "speak.xp": "✨ XP",
+  "speak.messages": "💬 Messages",
+  "speak.activeSince": "📅 Active Since",
+  "speak.days": "أيام",
+  "speak.lastActive": "🔥 Last Active",
+  "speak.rank": "🏆 Activity Rank",
+  "speak.noRewards": "⚠️ Activity rewards: NONE",
+
+  "leaderboard.title": "🏆 ACTIVITY LEADERBOARD",
+
+  "welcome.title": "👋 Welcome!",
+  "leave.title": "👋 Goodbye",
+
+  "ticket.panelButton": "فتح تذكرة",
+  "ticket.alreadyOpen": "❌ لديك تذكرة مفتوحة بالفعل ولا يمكنك فتح أكثر من {max}.",
+  "ticket.closed": "🔒 تم إغلاق التذكرة.",
+  "ticket.claimed": "👤 تم استلام التذكرة من قبل {user}",
+
+  "warn.logged": "⚠️ تم تحذير {user}",
+  "noPermission": "❌ ليس لديك الصلاحية اللازمة لتنفيذ هذا الأمر.",
+  "guildOnly": "❌ هذا الأمر يعمل فقط داخل السيرفر."
+}

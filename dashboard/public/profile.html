@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ZETA — ملفي الشخصي</title>
+  <link rel="icon" href="/dashboard/images/logo.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&family=Cairo:wght@500;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" />
+  <link rel="stylesheet" href="/dashboard/css/style.css" />
+  <link rel="stylesheet" href="/dashboard/css/icons.css" />
+  <script src="/dashboard/js/icons.js" defer></script>
+</head>
+<body>
+  <div class="profile-shell">
+    <aside class="profile-sidebar">
+      <div class="profile-id-card profile-id-card-pro">
+        <div class="profile-cover-mini"></div>
+        <div class="avatar-wrap" id="profileAvatarWrap">
+          <div class="avatar-ring"></div>
+          <img id="profileAvatar" src="" alt="" />
+          <span class="profile-online-dot"></span>
+        </div>
+        <div class="p-name" id="pName">...</div>
+        <div class="p-id" id="pId"></div>
+        <div class="profile-badges"><span>ZETA</span><span>Discord</span></div>
+        <div class="profile-wallet-chip">
+          <span class="wallet-dot"></span><span id="pWallet">0</span> SC
+        </div>
+      </div>
+
+      <nav class="profile-nav" id="profileNav">
+        <button class="nav-item active" data-section="overview">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
+          نظرة عامة
+        </button>
+        <button class="nav-item" data-section="servers">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="8" rx="2"/><rect x="2" y="13" width="20" height="8" rx="2"/><circle cx="6.5" cy="7" r="0.5" fill="currentColor"/><circle cx="6.5" cy="17" r="0.5" fill="currentColor"/></svg>
+          سيرفراتي
+        </button>
+        <button class="nav-item" data-section="activity">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l4-4 4 3 5-6"/></svg>
+          نشاطي
+        </button>
+      </nav>
+
+      <div class="profile-sidebar-footer">
+        <div id="themeSwitcher" style="margin-bottom:10px;"></div>
+        <a href="/auth/logout" class="back-link">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5M21 12H9"/></svg>
+          تسجيل الخروج
+        </a>
+      </div>
+    </aside>
+
+    <main class="profile-main">
+      <header class="profile-topbar">
+        <div>
+          <span class="profile-kicker">ZETA CONTROL CENTER</span>
+          <h1 id="sectionTitle">مرحبًا بك في ZETA</h1>
+          <p>اختر سيرفرًا وابدأ التحكم — كل الإعدادات المهمة أمامك بدون تعقيد.</p>
+        </div>
+        <div class="profile-top-actions">
+          <a class="profile-support" href="https://discord.gg/m8c2mUEMj" target="_blank" rel="noopener">الدعم</a>
+          <a class="profile-logout" href="/auth/logout">خروج</a>
+        </div>
+      </header>
+      <div id="app">
+        <div class="loading-panel"><span class="loading-dot"></span> جاري تجهيز لوحة التحكم...</div>
+      </div>
+    </main>
+  </div>
+
+  <script src="/dashboard/js/theme.js"></script>
+  <script src="/dashboard/js/particles.js"></script>
+  <script src="/dashboard/js/devilTrigger.js"></script>
+  <script src="/dashboard/js/imageUpload.js"></script>
+  <script src="/dashboard/js/profile.js"></script>
+</body>
+</html>

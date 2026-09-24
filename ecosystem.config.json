@@ -1,0 +1,11 @@
+{
+  "apps": [{
+    "name": "zeta",
+    "script": "src/bot.js",
+    "cwd": ".",
+    "autorestart": true,
+    "restart_delay": 5000,
+    "max_restarts": 20,
+    "time": true
+  }]
+}
