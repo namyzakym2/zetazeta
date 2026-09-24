@@ -1,0 +1,2 @@
+const { SlashCommandBuilder }=require('discord.js'); module.exports={data:new SlashCommandBuilder().setName('emojis').setDescription('عرض إيموجيات السيرفر'),async execute(i){const e=i.guild.emojis.cache.map(x=>x.toString());return i.reply(`😀 **الإيموجيات (${e.length})**
+${e.join(' ')}`.slice(0,2000));}};

@@ -1,0 +1,1 @@
+const { SlashCommandBuilder }=require('discord.js'); module.exports={data:new SlashCommandBuilder().setName('owner').setDescription('عرض مالك السيرفر'),async execute(i){return i.reply(`👑 مالك السيرفر: <@${i.guild.ownerId}>`);}};

@@ -1,0 +1,2 @@
+const { SlashCommandBuilder }=require('discord.js'); module.exports={data:new SlashCommandBuilder().setName('boosts').setDescription('معلومات البوستات'),async execute(i){return i.reply(`🚀 مستوى البوست: **${i.guild.premiumTier}**
+عدد البوستات: **${i.guild.premiumSubscriptionCount||0}**`);}};
