@@ -1,13 +1,13 @@
 {
-  "credit.title": "😈 DEVIL CREDIT",
+  "credit.title": "😈 ZETA",
   "credit.user": "👤 User",
-  "credit.balance": "🪙 DC",
+  "credit.balance": "🪙 ZETA",
   "credit.streak": "🔥 Daily Streak",
   "credit.days": "أيام",
   "credit.transfer.success": "💸 تم تحويل {amount} إلى {user}",
-  "credit.transfer.self": "❌ لا يمكنك تحويل الرصيد لنفسك.",
+  "credit.transfer.self": "❌ لا يمكنك تحويل رصيد Zeta لنفسك.",
   "credit.transfer.bot": "❌ لا يمكن التحويل إلى بوت.",
-  "credit.transfer.insufficient": "❌ رصيدك غير كافٍ لإتمام هذا التحويل.",
+  "credit.transfer.insufficient": "❌ رصيدك من Zeta غير كافٍ لإتمام هذا التحويل.",
   "credit.transfer.invalidAmount": "❌ يجب أن يكون المبلغ رقمًا موجبًا.",
 
   "daily.title": "🎁 DAILY REWARD",

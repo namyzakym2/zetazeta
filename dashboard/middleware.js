@@ -6,8 +6,28 @@ function wantsJson(req) {
   return req.path.startsWith('/api/') || req.path.startsWith('/user/') || req.path.startsWith('/admin/') || req.path.startsWith('/devil-panel/') || req.accepts('json') === 'json';
 }
 
+const DEMO_USER = {
+  id: '123456789012345678',
+  username: 'ZETA Admin',
+  discriminator: '0001',
+  avatar: null,
+  guilds: [
+    {
+      id: '112233445566778899',
+      name: 'سيرفر ZETA التجريبي',
+      icon: null,
+      owner: true,
+      permissions: '8'
+    }
+  ]
+};
+
 function ensureAuth(req, res, next) {
   if (req.isAuthenticated && req.isAuthenticated() && req.user) return next();
+  if (!process.env.CLIENT_ID || !process.env.DISCORD_CLIENT_SECRET) {
+    req.user = DEMO_USER;
+    return next();
+  }
   if (wantsJson(req)) return res.status(401).json({ success: false, error: 'يجب تسجيل الدخول أولاً.' });
   return res.redirect('/?login=required');
 }

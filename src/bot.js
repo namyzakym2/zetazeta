@@ -87,28 +87,28 @@ async function syncAllIndexes() {
 }
 
 async function start() {
-  if (!process.env.DISCORD_TOKEN) {
-    console.error('❌ Missing DISCORD_TOKEN in .env');
-    process.exit(1);
-  }
-  if (!process.env.MYSQL_URL && !(process.env.MYSQL_HOST && process.env.MYSQL_USER && process.env.MYSQL_DATABASE)) {
-    console.error('❌ Missing MySQL configuration in .env (MYSQL_URL or MYSQL_HOST/MYSQL_USER/MYSQL_DATABASE)');
-    process.exit(1);
-  }
-
   await mongoose.connect();
-  console.log('🗄️  MySQL connected');
+  console.log('🗄️  Database connected');
 
   await syncAllIndexes();
 
-  await client.login(process.env.DISCORD_TOKEN);
+  if (process.env.DISCORD_TOKEN) {
+    try {
+      await client.login(process.env.DISCORD_TOKEN);
+      console.log('🤖 Discord Bot logged in');
+    } catch (err) {
+      console.warn('⚠️ [AI Studio] Discord login failed:', err.message);
+    }
+  } else {
+    console.warn('⚠️ [AI Studio] DISCORD_TOKEN is not configured. Discord bot gateway is inactive.');
+  }
 
   // One entry point for Bot-Hosting: `node src/bot.js` starts BOTH the Discord bot
   // and the web dashboard in the same Node process. The dashboard reuses the
   // already-open MongoDB connection and the logged-in Discord client.
   try {
     const dashboard = require('../dashboard/server');
-    await dashboard.start({ embedded: true, discordClient: client });
+    await dashboard.start({ embedded: true, discordClient: client.isReady?.() ? client : null });
   } catch (err) {
     // Never take the bot offline because the dashboard has a configuration/runtime issue.
     console.error('⚠️ Dashboard failed to start automatically:', err.message);

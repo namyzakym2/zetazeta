@@ -1,13 +1,13 @@
 {
-  "credit.title": "😈 DEVIL CREDIT",
+  "credit.title": "😈 ZETA",
   "credit.user": "👤 User",
-  "credit.balance": "🪙 DC",
+  "credit.balance": "🪙 ZETA",
   "credit.streak": "🔥 Daily Streak",
   "credit.days": "Days",
   "credit.transfer.success": "💸 Transferred {amount} to {user}",
-  "credit.transfer.self": "❌ You cannot transfer DC to yourself.",
-  "credit.transfer.bot": "❌ You cannot transfer DC to a bot.",
-  "credit.transfer.insufficient": "❌ Your balance is insufficient for this transfer.",
+  "credit.transfer.self": "❌ You cannot transfer Zeta to yourself.",
+  "credit.transfer.bot": "❌ You cannot transfer Zeta to a bot.",
+  "credit.transfer.insufficient": "❌ Your Zeta balance is insufficient for this transfer.",
   "credit.transfer.invalidAmount": "❌ Amount must be a positive number.",
 
   "daily.title": "🎁 DAILY REWARD",

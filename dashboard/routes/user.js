@@ -48,6 +48,7 @@ router.get('/servers', ensureAuth, async (req, res) => {
   const userGuilds = req.user.guilds || [];
   const botGuilds = await BotGuild.find({});
   const botGuildMap = new Map(botGuilds.map((g) => [g.guildId, g]));
+  const discordClient = req.app.get('discordClient');
 
   // Show every server where the logged-in user can manage the server, even when
   // ZETA is NOT installed there yet. This lets the dashboard act as a server
@@ -61,6 +62,18 @@ router.get('/servers', ensureAuth, async (req, res) => {
     .map((g) => {
       const botInfo = botGuildMap.get(g.id);
       const installed = Boolean(botInfo);
+      
+      let activeChannelCount = null;
+      let memberCount = botInfo?.memberCount ?? null;
+
+      if (installed && discordClient) {
+        const clientGuild = discordClient.guilds.cache.get(g.id);
+        if (clientGuild) {
+          memberCount = clientGuild.memberCount ?? memberCount;
+          activeChannelCount = clientGuild.channels?.cache?.size ?? null;
+        }
+      }
+
       return {
         id: g.id,
         name: g.name,
@@ -69,7 +82,8 @@ router.get('/servers', ensureAuth, async (req, res) => {
           : botInfo?.icon || null,
         owner: g.owner,
         installed,
-        memberCount: botInfo?.memberCount ?? null
+        memberCount,
+        activeChannelCount
       };
     });
 

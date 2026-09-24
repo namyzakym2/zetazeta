@@ -267,37 +267,142 @@ class Query {
   select(s){this._select=s;return this;} lean(){return this;} exec(){return this._run(this);} then(a,b){return this.exec().then(a,b);} catch(b){return this.exec().catch(b);}
 }
 
+let useMemoryFallback = false;
+const memoryStore = new Map();
+
+function getMemoryModelStore(name) {
+  if (!memoryStore.has(name)) memoryStore.set(name, new Map());
+  return memoryStore.get(name);
+}
+
+function seedMemoryDefaults() {
+  if (memoryStore.size > 0) return;
+  const demoGuildId = '112233445566778899';
+  const demoUserId = '123456789012345678';
+
+  const botGuilds = getMemoryModelStore('BotGuild');
+  botGuilds.set(demoGuildId, {
+    _id: demoGuildId,
+    guildId: demoGuildId,
+    name: 'سيرفر ZETA التجريبي',
+    icon: '/dashboard/images/logo.png',
+    memberCount: 154,
+    joinedAt: new Date()
+  });
+
+  const guilds = getMemoryModelStore('Guild');
+  guilds.set(demoGuildId, {
+    _id: demoGuildId,
+    guildId: demoGuildId,
+    prefix: '!',
+    language: 'ar',
+    welcome: {
+      enabled: true,
+      channelId: '1002',
+      message: 'أهلاً بك {user} في سيرفر {server}!',
+      backgroundImage: '',
+      cardText: 'مرحبًا بك في المجتمع'
+    },
+    leave: {
+      enabled: true,
+      channelId: '1002',
+      message: 'وداعًا {user}'
+    },
+    ticketSettings: {
+      enabled: true,
+      channelId: '1004',
+      category: '1000',
+      supportRole: '2002',
+      ticketRole: '2001',
+      claimButton: true,
+      buttons: [
+        { id: 'btn_support', label: 'الدعم الفني', emoji: '🛠️', style: 'Primary' },
+        { id: 'btn_general', label: 'استفسار عام', emoji: '💬', style: 'Secondary' }
+      ]
+    }
+  });
+
+  const wallets = getMemoryModelStore('Wallet');
+  wallets.set(demoUserId, {
+    _id: demoUserId,
+    userId: demoUserId,
+    balance: 50000,
+    streak: 7,
+    profileBackground: ''
+  });
+
+  const users = getMemoryModelStore('User');
+  users.set(`${demoUserId}_${demoGuildId}`, {
+    _id: `${demoUserId}_${demoGuildId}`,
+    userId: demoUserId,
+    guildId: demoGuildId,
+    xp: 2450,
+    level: 14,
+    messages: 580
+  });
+
+  const transactions = getMemoryModelStore('Transaction');
+  transactions.set('tx_1', {
+    _id: 'tx_1',
+    fromUserId: '000000000000000000',
+    toUserId: demoUserId,
+    amount: 15000,
+    type: 'daily',
+    guildId: demoGuildId,
+    createdAt: new Date(Date.now() - 3600000)
+  });
+}
+
 async function ensurePool() {
   if (pool) return pool;
-  // Prefer explicit Bot-Hosting MYSQL_* variables. Some hosts inject a default
-  // MYSQL_URL pointing at 127.0.0.1:3306; that must not override the database
-  // credentials in the project's .env.
-  if (process.env.MYSQL_HOST && process.env.MYSQL_USER && process.env.MYSQL_DATABASE) {
-    pool = mysql.createPool({
-      host: process.env.MYSQL_HOST,
-      port: Number(process.env.MYSQL_PORT || 3306),
-      user: process.env.MYSQL_USER,
-      password: process.env.MYSQL_PASSWORD || '',
-      database: process.env.MYSQL_DATABASE,
-      waitForConnections: true,
-      connectionLimit: 5,
-      charset: 'utf8mb4'
-    });
-  } else if (process.env.MYSQL_URL) {
-    pool = mysql.createPool(process.env.MYSQL_URL);
-  } else {
-    throw new Error('Missing MYSQL_URL (or MYSQL_HOST/MYSQL_USER/MYSQL_DATABASE) in .env');
+  if (useMemoryFallback) return null;
+
+  const hasMysqlConfig = Boolean(
+    process.env.MYSQL_URL ||
+    (process.env.MYSQL_HOST && process.env.MYSQL_USER && process.env.MYSQL_DATABASE)
+  );
+
+  if (!hasMysqlConfig) {
+    console.warn('⚠️ [AI Studio] MySQL credentials not configured — in-memory document mock active.');
+    useMemoryFallback = true;
+    connected = true;
+    seedMemoryDefaults();
+    return null;
   }
-  console.log(`🔌 MySQL target: ${process.env.MYSQL_HOST || 'URL-configured'}:${process.env.MYSQL_PORT || 3306}/${process.env.MYSQL_DATABASE || 'URL-configured'}`);
-  const rawQuery = pool.query.bind(pool);
-  pool.query = async (sql, params) => {
-    const result = await rawQuery(sql, params);
-    if (/^\s*(UPDATE|INSERT|DELETE|REPLACE)/i.test(sql)) touched();
-    return result;
-  };
-  await pool.query(`CREATE TABLE IF NOT EXISTS zeta_documents (model_name VARCHAR(80) NOT NULL, doc_id VARCHAR(64) NOT NULL, data JSON NOT NULL, created_at DATETIME(3) NOT NULL, updated_at DATETIME(3) NOT NULL, PRIMARY KEY(model_name, doc_id), INDEX idx_model_created(model_name, created_at), INDEX idx_model_updated(model_name, updated_at)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`);
-  connected=true;
-  return pool;
+
+  try {
+    if (process.env.MYSQL_HOST && process.env.MYSQL_USER && process.env.MYSQL_DATABASE) {
+      pool = mysql.createPool({
+        host: process.env.MYSQL_HOST,
+        port: Number(process.env.MYSQL_PORT || 3306),
+        user: process.env.MYSQL_USER,
+        password: process.env.MYSQL_PASSWORD || '',
+        database: process.env.MYSQL_DATABASE,
+        waitForConnections: true,
+        connectionLimit: 5,
+        charset: 'utf8mb4'
+      });
+    } else if (process.env.MYSQL_URL) {
+      pool = mysql.createPool(process.env.MYSQL_URL);
+    }
+    console.log(`🔌 MySQL target: ${process.env.MYSQL_HOST || 'URL-configured'}:${process.env.MYSQL_PORT || 3306}/${process.env.MYSQL_DATABASE || 'URL-configured'}`);
+    const rawQuery = pool.query.bind(pool);
+    pool.query = async (sql, params) => {
+      const result = await rawQuery(sql, params);
+      if (/^\s*(UPDATE|INSERT|DELETE|REPLACE)/i.test(sql)) touched();
+      return result;
+    };
+    await pool.query(`CREATE TABLE IF NOT EXISTS zeta_documents (model_name VARCHAR(80) NOT NULL, doc_id VARCHAR(64) NOT NULL, data JSON NOT NULL, created_at DATETIME(3) NOT NULL, updated_at DATETIME(3) NOT NULL, PRIMARY KEY(model_name, doc_id), INDEX idx_model_created(model_name, created_at), INDEX idx_model_updated(model_name, updated_at)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`);
+    connected = true;
+    return pool;
+  } catch (err) {
+    console.warn(`⚠️ [AI Studio] Failed to connect to MySQL (${err.message}) — switching to in-memory store.`);
+    pool = null;
+    useMemoryFallback = true;
+    connected = true;
+    seedMemoryDefaults();
+    return null;
+  }
 }
 function project(doc, select){ if(!select) return doc; const fields=String(select).split(/\s+/).filter(Boolean); const include=fields.filter(x=>!x.startsWith('-')); if(include.length){const o={}; for(const f of include){const v=getPath(doc,f); if(v!==undefined)setPath(o,f,v);} if(!fields.includes('-_id')) o._id=doc._id; return o;} const o=clone(doc); for(const f of fields.filter(x=>x.startsWith('-'))) delPath(o,f.slice(1)); return o; }
 
@@ -306,7 +411,28 @@ function makeModel(name, schema){
     constructor(data={}) { Object.assign(this, applyDefaults(data,schema)); }
     toObject(){ return clone(this); }
     toJSON(){ return this.toObject(); }
-    async save(){ await ensurePool(); const p=process.env; const t=now(); const data=this.toObject(); if(schema?.options?.timestamps){ if(!data.createdAt)data.createdAt=t; data.updatedAt=t; } const [rows]=await pool.query('SELECT doc_id FROM zeta_documents WHERE model_name=? AND doc_id=?',[name,String(data._id)]); if(rows.length) await pool.query('UPDATE zeta_documents SET data=?, updated_at=? WHERE model_name=? AND doc_id=?',[JSON.stringify(data),t,name,String(data._id)]); else await pool.query('INSERT INTO zeta_documents(model_name,doc_id,data,created_at,updated_at) VALUES(?,?,?,?,?)',[name,String(data._id),JSON.stringify(data),data.createdAt||t,t]); const fresh=applyDefaults(data,schema); if(schema?.options?.timestamps){fresh.createdAt=data.createdAt; fresh.updatedAt=data.updatedAt;} Object.assign(this,fresh); return this; }
+    async save(){
+      await ensurePool();
+      const t=now();
+      const data=this.toObject();
+      if(schema?.options?.timestamps){ if(!data.createdAt)data.createdAt=t; data.updatedAt=t; }
+      if (useMemoryFallback) {
+        const store = getMemoryModelStore(name);
+        store.set(String(data._id), clone(data));
+        touched();
+        const fresh=applyDefaults(data,schema);
+        if(schema?.options?.timestamps){fresh.createdAt=data.createdAt; fresh.updatedAt=data.updatedAt;}
+        Object.assign(this,fresh);
+        return this;
+      }
+      const [rows]=await pool.query('SELECT doc_id FROM zeta_documents WHERE model_name=? AND doc_id=?',[name,String(data._id)]);
+      if(rows.length) await pool.query('UPDATE zeta_documents SET data=?, updated_at=? WHERE model_name=? AND doc_id=?',[JSON.stringify(data),t,name,String(data._id)]);
+      else await pool.query('INSERT INTO zeta_documents(model_name,doc_id,data,created_at,updated_at) VALUES(?,?,?,?,?)',[name,String(data._id),JSON.stringify(data),data.createdAt||t,t]);
+      const fresh=applyDefaults(data,schema);
+      if(schema?.options?.timestamps){fresh.createdAt=data.createdAt; fresh.updatedAt=data.updatedAt;}
+      Object.assign(this,fresh);
+      return this;
+    }
   }
   // Every query used to SELECT *every* document of the model (all servers, all users) over the
   // network, JSON.parse them all on the bot's single thread, and only then filter in JS. With a
@@ -337,6 +463,10 @@ function makeModel(name, schema){
   }
   async function allRaw(filter){
     await ensurePool();
+    if (useMemoryFallback) {
+      const store = getMemoryModelStore(name);
+      return Array.from(store.values()).map(clone);
+    }
     const parse = (rows) => rows.map(r=>typeof r.data==='string'?JSON.parse(r.data):r.data);
     const { clauses, params } = prefilterBroken ? { clauses: [], params: [] } : sqlPrefilter(filter);
     if (clauses.length) {
@@ -351,19 +481,85 @@ function makeModel(name, schema){
     const [rows]=await pool.query('SELECT data FROM zeta_documents WHERE model_name=?',[name]);
     return parse(rows);
   }
-  function qFind(filter={}, one=false, deleter=false){ return new Query(async q=>{ const cacheable = one && !deleter && CACHEABLE_MODELS.has(name) && !q._sort && !q._skip && q._limit==null && !q._select; const cacheKey = cacheable ? name+'|'+JSON.stringify(filter||{}) : null; let docs = cacheable ? (()=>{ const hit=cacheGet(cacheKey); return hit?[hit]:null; })() : null; if(!docs){ const ver=writeVersion; docs=(await all(filter)).filter(d=>matches(d,filter)); if(cacheable && docs[0] && ver===writeVersion) cacheSet(cacheKey, docs[0]); } if(q._sort){ const entries=Object.entries(q._sort); docs.sort((a,b)=>{for(const [k,dir] of entries){const av=getPath(a,k),bv=getPath(b,k); if(eq(av,bv))continue; return (av>bv?1:-1)*(dir<0?-1:1);} return 0;}); } if(q._skip)docs=docs.slice(q._skip); if(q._limit!=null)docs=docs.slice(0,q._limit); if(deleter){if(!docs.length)return null; const target=docs[0]; await pool.query('DELETE FROM zeta_documents WHERE model_name=? AND doc_id=?',[name,String(target._id)]); return target;} if(one)docs=docs.slice(0,1); docs=docs.map(d=>project(d,q._select)); const hydrated=docs.map(d=>new Model(d)); return one?(hydrated[0]||null):hydrated; }); }
+  function qFind(filter={}, one=false, deleter=false){ return new Query(async q=>{ const cacheable = one && !deleter && CACHEABLE_MODELS.has(name) && !q._sort && !q._skip && q._limit==null && !q._select; const cacheKey = cacheable ? name+'|'+JSON.stringify(filter||{}) : null; let docs = cacheable ? (()=>{ const hit=cacheGet(cacheKey); return hit?[hit]:null; })() : null; if(!docs){ const ver=writeVersion; docs=(await all(filter)).filter(d=>matches(d,filter)); if(cacheable && docs[0] && ver===writeVersion) cacheSet(cacheKey, docs[0]); } if(q._sort){ const entries=Object.entries(q._sort); docs.sort((a,b)=>{for(const [k,dir] of entries){const av=getPath(a,k),bv=getPath(b,k); if(eq(av,bv))continue; return (av>bv?1:-1)*(dir<0?-1:1);} return 0;}); } if(q._skip)docs=docs.slice(q._skip); if(q._limit!=null)docs=docs.slice(0,q._limit); if(deleter){if(!docs.length)return null; const target=docs[0]; if(useMemoryFallback){getMemoryModelStore(name).delete(String(target._id));touched();}else{await pool.query('DELETE FROM zeta_documents WHERE model_name=? AND doc_id=?',[name,String(target._id)]);} return target;} if(one)docs=docs.slice(0,1); docs=docs.map(d=>project(d,q._select)); const hydrated=docs.map(d=>new Model(d)); return one?(hydrated[0]||null):hydrated; }); }
   Model.create = async data => { const m=new Model(data); return m.save(); };
   Model.find = filter => qFind(filter,false);
   Model.findOne = filter => qFind(filter,true);
   Model.findById = idv => qFind({_id:String(idv)},true);
   Model.findOneAndDelete = filter => qFind(filter,true,true);
   Model.deleteOne = async filter => { const x=await qFind(filter,true,true).exec(); return {deletedCount:x?1:0}; };
-  Model.deleteMany = async filter => { const docs=await qFind(filter,false).exec(); if(docs.length) await pool.query(`DELETE FROM zeta_documents WHERE model_name=? AND doc_id IN (${docs.map(()=>'?').join(',')})`,[name,...docs.map(d=>String(d._id))]); return {deletedCount:docs.length}; };
+  Model.deleteMany = async filter => {
+    const docs=await qFind(filter,false).exec();
+    if(docs.length) {
+      if(useMemoryFallback){
+        const store = getMemoryModelStore(name);
+        for(const d of docs) store.delete(String(d._id));
+        touched();
+      } else {
+        await pool.query(`DELETE FROM zeta_documents WHERE model_name=? AND doc_id IN (${docs.map(()=>'?').join(',')})`,[name,...docs.map(d=>String(d._id))]);
+      }
+    }
+    return {deletedCount:docs.length};
+  };
   Model.countDocuments = async filter => (await all(filter)).filter(d=>matches(d,filter||{})).length;
   Model.exists = async filter => (await qFind(filter,true).exec()) ? {_id:true}:null;
-  Model.updateOne = async (filter,update,opts={}) => { const existing=await qFind(filter,true).exec(); if(existing){ const next=applyUpdate(existing,update,false); next.updatedAt=now(); await pool.query('UPDATE zeta_documents SET data=?,updated_at=? WHERE model_name=? AND doc_id=?',[JSON.stringify(next),next.updatedAt,name,String(next._id)]); return {matchedCount:1,modifiedCount:1}; } if(opts.upsert){const base={...filter}; const next=applyDefaults(applyUpdate(base,update,true),schema); const m=new Model(next); await m.save(); return {matchedCount:0,modifiedCount:0,upsertedId:m._id};} return {matchedCount:0,modifiedCount:0}; };
-  Model.updateMany = async (filter,update) => { const docs=await qFind(filter,false).exec(); for(const d of docs){const next=applyUpdate(d,update,false);next.updatedAt=now();await pool.query('UPDATE zeta_documents SET data=?,updated_at=? WHERE model_name=? AND doc_id=?',[JSON.stringify(next),next.updatedAt,name,String(next._id)]);} return {matchedCount:docs.length,modifiedCount:docs.length}; };
-  Model.findOneAndUpdate = (filter,update,opts={}) => new Query(async()=>{ const existing=await qFind(filter,true).exec(); if(existing){const next=applyUpdate(existing,update,false); if(schema?.options?.timestamps)next.updatedAt=now(); await pool.query('UPDATE zeta_documents SET data=?,updated_at=? WHERE model_name=? AND doc_id=?',[JSON.stringify(next),next.updatedAt||now(),name,String(next._id)]); return new Model(opts.new===false?existing:next);} if(opts.upsert){const next=applyDefaults(applyUpdate({...filter},update,true),schema);const m=new Model(next);await m.save();return opts.new===false?null:m;} return null;});
+  Model.updateOne = async (filter,update,opts={}) => {
+    const existing=await qFind(filter,true).exec();
+    if(existing){
+      const next=applyUpdate(existing,update,false);
+      next.updatedAt=now();
+      if(useMemoryFallback){
+        getMemoryModelStore(name).set(String(next._id), clone(next));
+        touched();
+      } else {
+        await pool.query('UPDATE zeta_documents SET data=?,updated_at=? WHERE model_name=? AND doc_id=?',[JSON.stringify(next),next.updatedAt,name,String(next._id)]);
+      }
+      return {matchedCount:1,modifiedCount:1};
+    }
+    if(opts.upsert){
+      const base={...filter};
+      const next=applyDefaults(applyUpdate(base,update,true),schema);
+      const m=new Model(next);
+      await m.save();
+      return {matchedCount:0,modifiedCount:0,upsertedId:m._id};
+    }
+    return {matchedCount:0,modifiedCount:0};
+  };
+  Model.updateMany = async (filter,update) => {
+    const docs=await qFind(filter,false).exec();
+    for(const d of docs){
+      const next=applyUpdate(d,update,false);
+      next.updatedAt=now();
+      if(useMemoryFallback){
+        getMemoryModelStore(name).set(String(next._id), clone(next));
+      } else {
+        await pool.query('UPDATE zeta_documents SET data=?,updated_at=? WHERE model_name=? AND doc_id=?',[JSON.stringify(next),next.updatedAt,name,String(next._id)]);
+      }
+    }
+    if(useMemoryFallback && docs.length) touched();
+    return {matchedCount:docs.length,modifiedCount:docs.length};
+  };
+  Model.findOneAndUpdate = (filter,update,opts={}) => new Query(async()=>{
+    const existing=await qFind(filter,true).exec();
+    if(existing){
+      const next=applyUpdate(existing,update,false);
+      if(schema?.options?.timestamps)next.updatedAt=now();
+      if(useMemoryFallback){
+        getMemoryModelStore(name).set(String(next._id), clone(next));
+        touched();
+      } else {
+        await pool.query('UPDATE zeta_documents SET data=?,updated_at=? WHERE model_name=? AND doc_id=?',[JSON.stringify(next),next.updatedAt||now(),name,String(next._id)]);
+      }
+      return new Model(opts.new===false?existing:next);
+    }
+    if(opts.upsert){
+      const next=applyDefaults(applyUpdate({...filter},update,true),schema);
+      const m=new Model(next);
+      await m.save();
+      return opts.new===false?null:m;
+    }
+    return null;
+  });
   Model.syncIndexes = async()=>{};
   return Model;
 }

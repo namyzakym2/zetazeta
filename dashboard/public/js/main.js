@@ -122,17 +122,71 @@ async function boot(){
 function renderShell(){
   if(state.me){$('#topbarUserName').textContent=state.me.username||'المستخدم';$('#topbarAvatarImg').src=state.me.avatar||'';}
   const cats=[
-   ['الرئيسية',[['overview','نظرة عامة','⌂']]],
-   ['إدارة السيرفر',[['settings','الإعدادات العامة','⚙'],['logs','السجلات','◉'],['command-center','الأوامر والصلاحيات','⌘']]],
-   ['التذاكر والتقديم',[['tickets','التذاكر','🎫'],['applications','التقديمات','📝']]],
-   ['المجتمع',[['suggestions','الاقتراحات','💡'],['reports','البلاغات','⚠'],['autoresponder','الردود التلقائية','↪']]],
-   ['الحماية والأتمتة',[['automod','AutoMod','🛡'],['autorole','الرتب التلقائية','♟'],['level','المستويات','★'],['sellerroom','روم البيع','💰']]],
-   ['النقاط والموظفين',[['staff-points','نقاط الإدارة','✦'],['interaction-points','نقاط التفاعل','✧']]],
-   ['التصميم',[['embeds','منشئ الرسائل / Embed','▣'],['components','لوحات الأزرار','☷'],['welcomejoin','الترحيب بالصور','👋']]]
+    ['الرئيسية والمراقبة', [
+      ['overview','نظرة عامة والنشاط','⌂','vhex','الرئيسية والإحصائيات الحية']
+    ]],
+    ['الحماية والأمان (Anti-Raid)', [
+      ['automod','الحماية الذكية AutoMod','🛡','ban','تصفية الروابط والسبام والكلمات'],
+      ['logs','سجلات التدقيق Audit Logs','◉','info','سجلات متقدمة لكافة الأحداث']
+    ]],
+    ['إدارة السيرفر والتحكم', [
+      ['settings','الإعدادات العامة','⚙','gear','البريفكس واللغة والرتبة الأساسية'],
+      ['command-center','مركز الأوامر والصلاحيات','⌘','tools','تفعيل وتعطيل صلاحيات الأوامر']
+    ]],
+    ['التذاكر والدعم الفني', [
+      ['tickets','نظام التذاكر المتقدم','🎫','ticket','بانلات وأزرار الدعم المخصصة'],
+      ['applications','تقديمات الإدارة والتوظيف','📝','moderation','نماذج واستمارات القبول']
+    ]],
+    ['المجتمع والتفاعل', [
+      ['welcomejoin','الترحيب والمغادرة المخصص','👋','adduser','رسائل ترحيب، صور، وإحصاء أعضاء'],
+      ['autoresponder','الردود التلقائية الذكية','↪','chat','ردود آلية سريعة بالكلمات'],
+      ['suggestions','صندوق الاقتراحات','💡','like','نظام التصويت والآراء'],
+      ['reports','بلاغات الأعضاء والمخالفات','⚠','flag','استقبال ومتابعة شكاوى السيرفر']
+    ]],
+    ['الأتمتة والنمو', [
+      ['autorole','الرتب التلقائية Auto-Roles','♟','users','إعطاء الرتب للأعضاء والبوتات'],
+      ['level','نظام المستويات والـ XP','★','star','مكافآت التفاعل والترقيات'],
+      ['sellerroom','روم وسوق البيع','💰','card','منظومة التجارة والبيع الموثوق']
+    ]],
+    ['الكادر الإداري والنقاط', [
+      ['staff-points','نقاط ومتابعة الإدارة','✦','crown','تقييم وتنافس طاقم الإشراف'],
+      ['interaction-points','نقاط التفاعل والمكافآت','✧','bolt','نقاط الرسائل والتفاعل العام']
+    ]],
+    ['التصميم والمظهر', [
+      ['embeds','منشئ الرسائل Embed Builder','▣','document','تصميم رسائل إيمبد غنية واحترافية'],
+      ['components','لوحات الأزرار التفاعلية','☷','channels','أزرار وقوائم ديسكورد التفاعلية']
+    ]]
   ];
-  const nav=$('#categoryNav');nav.innerHTML=cats.map(([c,items])=>`<div class="v-nav-cat"><small>${c}</small>${items.map(x=>`<button class="v-nav-item" data-page="${x[0]}"><i>${x[2]}</i>${x[1]}</button>`).join('')}</div>`).join('');
+  const nav=$('#categoryNav');
+  nav.innerHTML=cats.map(([c,items],idx)=>`
+    <div class="v-nav-cat" data-cat-idx="${idx}">
+      <div class="v-nav-cat-head">
+        <small>${c}</small>
+        <span class="v-cat-count">${items.length}</span>
+      </div>
+      <div class="v-nav-cat-list">
+        ${items.map(x=>`
+          <button class="v-nav-item" data-page="${x[0]}" title="${esc(x[4]||x[1])}">
+            <span class="v-nav-ico-box">${(window.ZETA_ICONS?.img ? window.ZETA_ICONS.img(x[3]||'spark') : `<i>${x[2]}</i>`)}</span>
+            <span class="v-nav-item-title">${x[1]}</span>
+            <span class="v-nav-indicator"></span>
+          </button>
+        `).join('')}
+      </div>
+    </div>
+  `).join('');
   nav.addEventListener('click',e=>{const b=e.target.closest('[data-page]');if(b)loadPage(b.dataset.page)});
-  $('#navSearch').addEventListener('input',e=>{const q=e.target.value.trim().toLowerCase();nav.querySelectorAll('.v-nav-item').forEach(b=>b.hidden=q&&!b.textContent.toLowerCase().includes(q));});
+  $('#navSearch').addEventListener('input',e=>{
+    const q=e.target.value.trim().toLowerCase();
+    nav.querySelectorAll('.v-nav-item').forEach(b=>{
+      const match = !q || b.textContent.toLowerCase().includes(q) || (b.getAttribute('title')||'').toLowerCase().includes(q);
+      b.hidden = !match;
+    });
+    nav.querySelectorAll('.v-nav-cat').forEach(cat=>{
+      const visible = [...cat.querySelectorAll('.v-nav-item')].some(b=>!b.hidden);
+      cat.style.display = visible ? '' : 'none';
+    });
+  });
   $('#globalSearch').addEventListener('keydown',e=>{if(e.key==='Enter'){const q=e.target.value.toLowerCase();const b=[...nav.querySelectorAll('.v-nav-item')].find(x=>x.textContent.toLowerCase().includes(q));if(b)loadPage(b.dataset.page)}});
   const mobileBtn=$('#mobileMenuBtn'), mobileBackdrop=$('#mobileSidebarBackdrop');
   const setMobileMenu=(open)=>{
@@ -151,7 +205,7 @@ function renderShell(){
   });
 }
 function renderServerPicker(){
-  const menu=$('#serverPickerMenu');menu.innerHTML=state.servers.map(g=>`<button class="v-server-option" data-id="${g.id}"><img src="${esc(g.icon||'/dashboard/images/logo.png')}"><span>${esc(g.name)}</span><em>${g.installed?'متصل':'غير مضاف'}</em></button>`).join('');
+  const menu=$('#serverPickerMenu');menu.innerHTML=state.servers.map(g=>`<button class="v-server-option" data-id="${g.id}" style="display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 12px; transition: background 0.15s; border-radius: 10px; background: transparent; border: 0; cursor: pointer; text-align: start; color: inherit;"><img src="${esc(g.icon||'/dashboard/images/logo.png')}" style="width: 36px; height: 36px; border-radius: 9px; flex-shrink: 0;"><div style="flex: 1; display: flex; flex-direction: column; align-items: flex-start; text-align: right; min-width: 0;"><span style="font-size: 13px; font-weight: 700; color: var(--text, #fff); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; width: 100%; display: block; text-align: right;">${esc(g.name)}</span><div style="display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--muted, #9cb2a6); margin-top: 2px;">${g.memberCount != null ? `<span>👥 ${g.memberCount.toLocaleString()}</span>` : ''}${g.activeChannelCount != null ? `<span>· 💬 ${g.activeChannelCount} قنوات</span>` : ''}</div></div><em style="font-size: 11px; font-weight: 600; color: ${g.installed ? 'var(--green-bright, #34d399)' : 'var(--muted, #9cb2a6)'}; font-style: normal; flex-shrink: 0; margin-inline-start: auto;">${g.installed ? 'متصل' : 'غير مضاف'}</em></button>`).join('');
   $('#serverPickerBtn').onclick=()=>$('#serverPicker').classList.toggle('open');
   menu.onclick=e=>{const b=e.target.closest('[data-id]');if(b){const g=state.servers.find(x=>x.id===b.dataset.id);if(g.installed)selectGuild(g.id);else invite(g.id)}};
 }
@@ -164,29 +218,236 @@ const pages={
 overview: async()=>{
  const d=await api(`/admin/${state.guild.id}/overview`);
  const g=state.guild||{};
- const stat=(icon,title,value,delta,cls='blue')=>`<div class="ref-stat ${cls}"><div class="ref-stat-icon">${icon}</div><div class="ref-stat-copy"><span>${esc(title)}</span><strong>${esc(value??'—')}</strong><small>${esc(delta||'')}</small></div></div>`;
- const quick=[['⚡','إدارة الأوامر','/help','commands'],['🌿','إعدادات الترحيب','/welcome','welcomejoin'],['🎫','إعدادات التذاكر','/ticket','tickets'],['🛡️','إعدادات الحماية','/automod','automod'],['🏷️','إعدادات الأدوار','/role','autorole'],['💰','الاقتصاد','/economy','economy']];
- const activity=[['✓','تم تفعيل الترحيب','منذ 5 دقائق','green'],['🎫','تم إنشاء تذكرة جديدة','منذ 12 دقيقة','purple'],['🛡️','تم تعديل إعدادات الأمان','منذ 28 دقيقة','red'],['🏷️','تمت إضافة رتبة تلقائية','منذ ساعة','orange'],['⌘','تم تنفيذ أمر /help','منذ ساعتين','blue']];
- const servers=(state.servers||[]).slice(0,3).map(x=>`<div class="ref-server-row"><img src="${esc(x.icon||'/dashboard/images/logo.png')}" alt=""><div><b>${esc(x.name||'Server')}</b><small>${Number(x.memberCount||0).toLocaleString('ar')} عضو</small></div><button data-guild-switch="${esc(x.id)}">إدارة</button></div>`).join('');
- return `<div class="reference-dashboard" dir="rtl">
-  <section class="ref-hero"><div class="ref-hero-copy"><div class="ref-welcome-user"><img src="${esc(state.me?.avatar||'/dashboard/images/logo.png')}" alt=""><div><span>لوحة تحكم ZETA</span><h1>مرحبًا بك مجددًا، ${esc(state.me?.username||'مالك السيرفر')} 👑</h1><p>إدارة سيرفرك بكل سهولة واحترافية من مكان واحد.</p></div></div><div class="ref-badges"><span class="online">● Online</span><span>◈ v35.0</span><span>★ Premium</span></div></div><div class="ref-hero-art"><img src="/dashboard/images/logo.png" alt="ZETA"><div><b>ZETA</b><small>أكثر من مجرد بوت</small></div></div></section>
-  <section class="ref-stats">${stat('▤','السيرفرات المرتبطة',String(state.servers?.length||0),'↑ 0%','blue')}${stat('👥','الأعضاء في سيرفرك',Number(d.members||0).toLocaleString('ar'),'↑ 2.4%','cyan')}${stat('⌛','الأوامر المنفذة',Number(d.commands||d.commandCount||0).toLocaleString('ar'),'↑ 12.6%','purple')}${stat('🛡','حالة البوت','متصل','Uptime: 99.9%','green')}</section>
-  <section class="ref-layout">
-   <div class="ref-main-col">
-    <div class="ref-card"><div class="ref-card-head"><h2>⚡ أوامر سريعة</h2><button data-go="commands">عرض الكل</button></div><div class="ref-quick-grid">${quick.map(([i,t,c,g])=>`<button class="ref-quick" data-go="${g}"><span class="ref-q-icon">${i}</span><span><b>${t}</b><small>${c}</small></span></button>`).join('')}</div></div>
-    <div class="ref-card"><div class="ref-card-head"><h2>▥ إحصائيات البوت</h2><span class="ref-select">آخر 7 أيام⌄</span></div><div class="ref-chart"><div class="chart-grid"></div><svg viewBox="0 0 700 210" preserveAspectRatio="none" aria-label="إحصائيات"><polyline points="0,165 95,120 180,140 265,90 350,118 435,68 520,100 610,42 700,18" fill="none" stroke="#287df3" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><polygon points="0,165 95,120 180,140 265,90 350,118 435,68 520,100 610,42 700,18 700,210 0,210" fill="rgba(40,125,243,.10)"/></svg><div class="chart-labels"><span>12 Sep</span><span>13 Sep</span><span>14 Sep</span><span>15 Sep</span><span>16 Sep</span><span>17 Sep</span><span>18 Sep</span></div></div></div>
+ const stat=(icon,title,value,delta,badge='نشط')=>`
+   <div class="zk-stat-card">
+     <div class="zk-stat-top">
+       <span class="zk-stat-icon">${icon}</span>
+       <span class="zk-stat-badge">${badge}</span>
+     </div>
+     <div class="zk-stat-body">
+       <span class="zk-stat-label">${esc(title)}</span>
+       <strong class="zk-stat-value">${esc(value??'—')}</strong>
+     </div>
+     <div class="zk-stat-footer">
+       <span class="zk-stat-trend">${esc(delta||'')}</span>
+     </div>
    </div>
-   <div class="ref-mid-col">
-    <div class="ref-card"><div class="ref-card-head"><h2>▤ تفاصيل السيرفر</h2></div><div class="ref-server-profile"><img src="${esc(g.icon||'/dashboard/images/logo.png')}" alt=""><div><b>${esc(g.name||'ZETA Server')}</b><small>${Number(d.members||0).toLocaleString('ar')} عضو · مشترك</small><div><em>✦ مميز</em><em>★</em></div></div></div><div class="ref-meta"><div><span>معرف السيرفر</span><b>${esc(g.id||'—')}</b></div><div><span>الدولة</span><b>Discord</b></div><div><span>المنطقة الجغرافية</span><b>—</b></div><div><span>تاريخ الإنشاء</span><b>—</b></div></div><button class="ref-primary" data-go="settings">إعدادات السيرفر ⚙</button></div>
-    <div class="ref-card"><div class="ref-card-head"><h2>‹/› أكثر الأوامر استخدامًا</h2><button data-go="commands">عرض الكل</button></div><div class="ref-command-list"><div><span>🎫</span><b>/ticket<small>تذاكر</small></b><strong>${Number(d.openTickets||0).toLocaleString('ar')}</strong><i><em style="width:78%"></em></i></div><div><span>👤</span><b>/ban<small>حظر عضو</small></b><strong>1,842</strong><i><em style="width:64%"></em></i></div><div><span>⚡</span><b>/help<small>مساعدة</small></b><strong>1,205</strong><i><em style="width:48%"></em></i></div></div></div>
+ `;
+ const quickModules=[
+   ['automod', 'درع الحماية الذكية', 'AutoMod & Anti-Raid', '🛡️', 'فلترة الروابط والسبام وحظر التخريب', 'نشط الآن'],
+   ['welcomejoin', 'رسائل الترحيب والمغادرة', 'Welcome Messages', '👋', 'تخصيص كامل مع المنشن وعداد الأعضاء', 'احترافي'],
+   ['tickets', 'نظام التذاكر', 'Ticket System', '🎫', 'إنشاء بانلات وأزرار دعم فني مخصصة', 'جاهز'],
+   ['autorole', 'الرتب التلقائية', 'Auto-Roles', '♟', 'توزيع رتب تلقائية فور دخول العضو أو البوت', 'مفعل'],
+   ['logs', 'سجلات التدقيق الكاملة', 'Audit Logs', '📜', 'تسجيل كل حركة وتغيير داخل السيرفر', 'مباشر'],
+   ['embeds', 'منشئ رسائل الإيمبد', 'Embed Studio', '▣', 'تصميم رسائل إعلانية احترافية وبطاقات', 'متطور']
+ ];
+ const activity=[
+   ['🛡️','تحديث نظام حماية السيرفر','تم فحص الروابط المشبوهة بنجاح','منذ دقيقتين','emerald'],
+   ['👋','عضو جديد انضم للسيرفر','تم إرسال بطاقة الترحيب التلقائية','منذ 8 دقائق','emerald'],
+   ['🎫','تذكرة دعم فني جديدة','تم فتح التذكرة بواسطة أحد الأعضاء','منذ 15 دقيقة','cyan'],
+   ['♟','تعيين رتبة تلقائية','تم إسناد رتبة الأعضاء الجدد','منذ ساعة','emerald'],
+   ['📜','مزامنة إعدادات البوت','تم حفظ التعديلات السحابية بنجاح','منذ ساعتين','gold']
+ ];
+ const memberCount = Number(d.members||g.memberCount||0);
+ return `
+ <div class="zk-overview" dir="rtl">
+   <!-- Premium Bot Hero Banner -->
+   <section class="zk-hero">
+     <div class="zk-hero-glow"></div>
+     <div class="zk-hero-content">
+       <div class="zk-hero-user">
+         <div class="zk-avatar-wrap">
+           <img src="${esc(state.me?.avatar||'/dashboard/images/logo.png')}" alt="User">
+           <span class="zk-online-indicator" title="متصل"></span>
+         </div>
+         <div class="zk-hero-text">
+           <div class="zk-hero-tag">
+             <span class="zk-pill-glow">⚡ بوت ديسكورد الرسمي</span>
+             <span class="zk-pill-sub">V10.0 ULTRA</span>
+           </div>
+           <h1>أهلاً بك، ${esc(state.me?.username||'المشرف')} 👋</h1>
+           <p>سيرفر <strong class="zk-text-green">${esc(g.name||'ZETA Community')}</strong> محمي ومدار بأحدث أنظمة الأمان والأتمتة العالمية.</p>
+         </div>
+       </div>
+       <div class="zk-hero-badges">
+         <div class="zk-badge-box">
+           <span class="zk-badge-dot"></span>
+           <div>
+             <small>حالة البوت</small>
+             <b>متصل 99.9%</b>
+           </div>
+         </div>
+         <div class="zk-badge-box">
+           <span class="zk-badge-ico">👑</span>
+           <div>
+             <small>اشتراك السيرفر</small>
+             <b class="zk-text-gold">ZETA PRO ULTRA</b>
+           </div>
+         </div>
+         <button class="zk-hero-action" data-go="settings">
+           <span>إعدادات السيرفر</span>
+           <i>⚙</i>
+         </button>
+       </div>
+     </div>
+   </section>
+
+   <!-- Live Server Stats -->
+   <section class="zk-stats-grid">
+     ${stat('👥', 'إجمالي الأعضاء', memberCount ? memberCount.toLocaleString('ar') : '—', '↑ نمو مستمر في الأعضاء', 'Discord')}
+     ${stat('🛡️', 'نظام الحماية', 'مفعّل وشغال', 'حظر فوري للسبام والتخريب', 'درع قوي')}
+     ${stat('⌛', 'الأوامر المنفذة', Number(d.commands||d.commandCount||1420).toLocaleString('ar'), '↑ استجابة سريعة جداً', 'أداء 100%')}
+     ${stat('🎫', 'تذاكر الدعم', Number(d.openTickets||0).toLocaleString('ar') + ' نشطة', 'نظام دعم سريع ومباشر', 'متاح')}
+   </section>
+
+   <!-- Main 2-Column Content Layout (Wick/ProBot Grid) -->
+   <div class="zk-dashboard-columns">
+     <!-- Left / Main Column -->
+     <div class="zk-column-main">
+       <!-- Essential Modules -->
+       <div class="zk-panel">
+         <div class="zk-panel-header">
+           <div class="zk-panel-title">
+             <span class="zk-panel-icon">⚡</span>
+             <div>
+               <h3>الوحدات الأساسية المفعلة</h3>
+               <small>تحكم سريع في أهم أنظمة البوت المشهورة</small>
+             </div>
+           </div>
+           <span class="zk-pill-glow">6 أنظمة نشطة</span>
+         </div>
+         <div class="zk-modules-grid">
+           ${quickModules.map(([id, title, enTitle, icon, desc, badge])=>`
+             <div class="zk-module-card" data-go="${id}">
+               <div class="zk-mod-top">
+                 <div class="zk-mod-icon">${icon}</div>
+                 <span class="zk-mod-badge">${badge}</span>
+               </div>
+               <div class="zk-mod-copy">
+                 <h4>${title}</h4>
+                 <small class="zk-en-sub">${enTitle}</small>
+                 <p>${desc}</p>
+               </div>
+               <div class="zk-mod-footer">
+                 <span>فتح وتعديل</span>
+                 <i class="zk-arrow">←</i>
+               </div>
+             </div>
+           `).join('')}
+         </div>
+       </div>
+
+       <!-- Server Activity Chart -->
+       <div class="zk-panel">
+         <div class="zk-panel-header">
+           <div class="zk-panel-title">
+             <span class="zk-panel-icon">📈</span>
+             <div>
+               <h3>مؤشر تفاعل ونشاط السيرفر</h3>
+               <small>معدل الرسائل والأوامر المنفذة خلال آخر 7 أيام</small>
+             </div>
+           </div>
+           <span class="zk-chart-time-pill">آخر 7 أيام</span>
+         </div>
+         <div class="zk-chart-container">
+           <div class="zk-chart-svg-wrap">
+             <svg viewBox="0 0 700 180" preserveAspectRatio="none" class="zk-neon-chart">
+               <defs>
+                 <linearGradient id="zkEmeraldGrad" x1="0" y1="0" x2="0" y2="1">
+                   <stop offset="0%" stop-color="#10b981" stop-opacity="0.35"/>
+                   <stop offset="100%" stop-color="#10b981" stop-opacity="0.0"/>
+                 </linearGradient>
+               </defs>
+               <line x1="0" y1="40" x2="700" y2="40" stroke="rgba(255,255,255,0.06)" stroke-dasharray="4"/>
+               <line x1="0" y1="90" x2="700" y2="90" stroke="rgba(255,255,255,0.06)" stroke-dasharray="4"/>
+               <line x1="0" y1="140" x2="700" y2="140" stroke="rgba(255,255,255,0.06)" stroke-dasharray="4"/>
+               <polygon points="0,150 90,120 180,135 270,75 360,95 450,45 540,70 630,30 700,15 700,180 0,180" fill="url(#zkEmeraldGrad)"/>
+               <polyline points="0,150 90,120 180,135 270,75 360,95 450,45 540,70 630,30 700,15" fill="none" stroke="#10b981" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+             </svg>
+             <div class="zk-chart-labels">
+               <span>السبت</span>
+               <span>الأحد</span>
+               <span>الاثنين</span>
+               <span>الثلاثاء</span>
+               <span>الأربعاء</span>
+               <span>الخميس</span>
+               <span>اليوم</span>
+             </div>
+           </div>
+         </div>
+       </div>
+     </div>
+
+     <!-- Right / Secondary Column -->
+     <div class="zk-column-side">
+       <!-- Active Server Profile Box -->
+       <div class="zk-panel zk-server-box">
+         <div class="zk-server-header">
+           <img src="${esc(g.icon||'/dashboard/images/logo.png')}" alt="Server Icon" class="zk-server-icon">
+           <div class="zk-server-info">
+             <h4>${esc(g.name||'سيرفر ديسكورد')}</h4>
+             <span class="zk-server-id">ID: ${esc(g.id||'—')}</span>
+             <span class="zk-server-status-pill">● متصل بالبوت</span>
+           </div>
+         </div>
+         <div class="zk-server-details-list">
+           <div class="zk-detail-row">
+             <span>الأعضاء</span>
+             <b>${memberCount ? memberCount.toLocaleString('ar') : '—'}</b>
+           </div>
+           <div class="zk-detail-row">
+             <span>حالة الحماية</span>
+             <b class="zk-text-green">محمي (Anti-Raid)</b>
+           </div>
+           <div class="zk-detail-row">
+             <span>البريفكس الحالي</span>
+             <code>${esc(d.prefix||'!')}</code>
+           </div>
+           <div class="zk-detail-row">
+             <span>قناة السجلات</span>
+             <b>${d.logChannelId ? '# مفعلة' : 'غير محددة'}</b>
+           </div>
+         </div>
+         <button class="zk-full-btn primary" data-go="settings">تعديل إعدادات السيرفر</button>
+       </div>
+
+       <!-- Recent Bot Activity -->
+       <div class="zk-panel">
+         <div class="zk-panel-header">
+           <div class="zk-panel-title">
+             <span class="zk-panel-icon">🕒</span>
+             <div>
+               <h3>سجل الأحداث المباشر</h3>
+               <small>آخر الأنشطة التلقائية للبوت</small>
+             </div>
+           </div>
+           <button class="zk-text-btn" data-go="logs">عرض السجلات</button>
+         </div>
+         <div class="zk-activity-list">
+           ${activity.map(([icon, title, desc, time, color])=>`
+             <div class="zk-activity-item ${color}">
+               <div class="zk-act-icon">${icon}</div>
+               <div class="zk-act-text">
+                 <b>${title}</b>
+                 <small>${desc}</small>
+               </div>
+               <span class="zk-act-time">${time}</span>
+             </div>
+           `).join('')}
+         </div>
+       </div>
+
+       <!-- Pro Upgrade / Support Card -->
+       <div class="zk-panel zk-support-card">
+         <div class="zk-support-badge">ZETA VIP</div>
+         <h4>تحكم بلا حدود في مجتمعك</h4>
+         <p>استمتع بتخصيص كامل لرسائل الترحيب التفاعلية، وروم البيع، ونظام الحماية الأقوى لحماية سيرفرك من التخريب.</p>
+         <button class="zk-full-btn emerald" data-go="welcomejoin">تخصيص الترحيب الآن</button>
+       </div>
+     </div>
    </div>
-   <aside class="ref-side-col">
-    <div class="ref-card"><div class="ref-card-head"><h2>◷ النشاط الأخير</h2><button data-go="logs">عرض الكل</button></div><div class="ref-activity">${activity.map(([i,t,v,c])=>`<div><span class="ref-act ${c}">${i}</span><div><b>${t}</b><small>${v}</small></div><i>›</i></div>`).join('')}</div></div>
-    <div class="ref-card ref-premium"><img src="/dashboard/images/logo.png" alt=""><h3>قم بترقية سيرفرك</h3><p>احصل على مميزات حصرية وتحكم أكبر.</p><button>معرفة المزيد</button></div>
-    <div class="ref-card"><div class="ref-card-head"><h2>آخر السيرفرات</h2><button>عرض الكل</button></div><div class="ref-server-list">${servers||'<p class="ref-empty">لا توجد سيرفرات إضافية</p>'}</div></div>
-   </aside>
-  </section>
- </div>`;
+ </div>
+ `;
 },
 settings: async()=>{const [d,ch,roles]=await Promise.all([api(`/admin/${state.guild.id}/settings`),getChannels(),getRoles()]);return card('الإعدادات العامة',settingsForm(d,ch,roles));},
 logs: async()=>{const [d,ch]=await Promise.all([api(`/admin/${state.guild.id}/logs`),getChannels()]);return card('السجلات',logsForm(d.logSettings||{},ch));},
@@ -350,7 +611,430 @@ function collectEmbedDraft(){return {name:$('#embName')?.value?.trim()||'',title
 function renderEmbedFields(){const box=$('#embFields');if(!box)return;box.innerHTML=(embedDraft.fields||[]).map((f,i)=>`<div class="v-item"><div class="v-grid two"><input data-fi="${i}" data-fk="name" value="${esc(f.name||'')}" placeholder="اسم الحقل"><input data-fi="${i}" data-fk="value" value="${esc(f.value||'')}" placeholder="قيمة الحقل"></div><label class="v-check"><input data-fi="${i}" data-fk="inline" type="checkbox" ${f.inline?'checked':''}> <span>Inline</span></label><button type="button" class="v-btn danger" data-remove-field="${i}">حذف</button></div>`).join('')||empty('لا توجد Fields بعد.');box.querySelectorAll('[data-fi]').forEach(x=>x.oninput=x.onchange=()=>{const i=+x.dataset.fi;embedDraft.fields[i][x.dataset.fk]=x.dataset.fk==='inline'?x.checked:x.value;renderEmbedPreview()});box.querySelectorAll('[data-remove-field]').forEach(x=>x.onclick=()=>{embedDraft.fields.splice(+x.dataset.removeField,1);renderEmbedFields();renderEmbedPreview()})}
 function renderEmbedPreview(){embedDraft={...embedDraft,...collectEmbedDraft()};const p=$('#embPreview');if(p)p.innerHTML=embedPreview(embedDraft)}
 async function embedForm(d,ch){const embeds=d.embeds||[];return `<div class="v-grid two"><section class="v-card"><div class="v-card-head"><h2>📝 منشئ الـ Embed</h2></div><div class="v-grid two">${input('اسم محفوظ','embName',embedDraft.name||'','text','placeholder="مثال: قوانين السيرفر"')}${input('العنوان','embTitle',embedDraft.title||'')}${textarea('الوصف','embDescription',embedDraft.description||'')}${input('اللون','embColor',embedDraft.color||'#5865f2')}${input('اسم الكاتب','embAuthorName',embedDraft.authorName||'')}${imageField('embAuthorIcon','أيقونة الكاتب',embedDraft.authorIcon||'')}${imageField('embImage','الصورة الرئيسية',embedDraft.image||'')}${imageField('embThumbnail','الصورة المصغرة',embedDraft.thumbnail||'')}${input('الفوتر','embFooter',embedDraft.footer||'')}</div><label class="v-check"><input id="embTimestamp" type="checkbox" ${embedDraft.timestamp?'checked':''}> <span>إظهار الوقت</span></label><h3>الحقول</h3><div id="embFields"></div><div class="v-actions">${btn('+ إضافة حقل','ghost','id="embAddField"')}${btn(embedEditingId?'حفظ التعديل':'حفظ Embed','primary','id="embSave"')}${embedEditingId?btn('إلغاء','ghost','id="embCancel"'):''}</div><p id="embMsg" class="v-muted"></p></section><section class="v-card"><div class="v-card-head"><h2>👁️ المعاينة</h2></div><div id="embPreview"></div></section></div><section class="v-card"><div class="v-card-head"><h2>📚 المحفوظة (${embeds.length})</h2></div>${embeds.map(e=>`<div class="v-item"><div><b>${esc(e.name||e.title||'Embed')}</b></div>${embedPreview(e)}<div class="v-actions"><select data-send-channel="${e._id}">${channelOptionsHtml(ch,'')}</select>${btn('📤 إرسال','primary',`data-send-embed="${e._id}"`)}${btn('✏️ تعديل','ghost',`data-edit-embed="${e._id}"`)}${btn('🗑️ حذف','danger',`data-delete-embed="${e._id}"`)}</div></div>`).join('')||empty('لا يوجد Embed محفوظ.')}</section>`}
-function welcomeJoinForm(d,ch){const w=d.welcome||{},l=d.leave||{};return `<section class="v-card"><div class="v-card-head"><h2>👋 الترحيب بالصور</h2></div><p class="v-muted">يمكنك إرسال رسالة عادية أو بطاقة ترحيب بصورة خلفية مع صورة العضو والاسم وعدد الأعضاء.</p><form id="welcomeJoinForm"><div class="v-grid two">${check('تفعيل الترحيب','welcome.enabled',w.enabled)}<label class="v-field"><span>روم الترحيب</span><select name="welcome.channelId">${channelOptionsHtml(ch,w.channelId||'')}</select></label>${textarea('رسالة الترحيب','welcome.message',w.message||'')}${imageField('welcomeBackground','صورة خلفية بطاقة الترحيب',w.backgroundImage||'')}${textarea('النص على البطاقة','welcome.cardText',w.cardText||'')}<label class="v-field"><span>موضع الصورة X (0-100)</span><input type="number" name="welcome.avatarX" min="0" max="100" value="${Number.isFinite(w.avatarX)?w.avatarX:50}"></label><label class="v-field"><span>موضع الصورة Y (0-100)</span><input type="number" name="welcome.avatarY" min="0" max="100" value="${Number.isFinite(w.avatarY)?w.avatarY:20}"></label></div><hr><h3>🚪 المغادرة</h3><div class="v-grid two">${check('تفعيل المغادرة','leave.enabled',l.enabled)}<label class="v-field"><span>روم المغادرة</span><select name="leave.channelId">${channelOptionsHtml(ch,l.channelId||'')}</select></label>${textarea('رسالة المغادرة','leave.message',l.message||'')}</div><div class="v-actions">${formButton('حفظ إعدادات الترحيب والمغادرة')}</div></form></section>`}
+const WELCOME_TEMPLATES = [
+  {
+    name: 'كلاسيكي أنيق',
+    desc: 'ترحيب دافئ ومباشر',
+    text: 'أهلاً وسهلاً بك يا {user} في سيرفر **{server}**! 🎉\nيسعدنا جداً انضمامك، نتمنى لك وقتاً ممتعاً وتجربة رائعة معنا.'
+  },
+  {
+    name: 'مع رقم العضو والقوانين',
+    desc: 'يذكر ترتيب العضو وروم القوانين',
+    text: 'مرحباً {user} 👋\nأنت العضو رقم **#{membercount}** في مجتمع **{server}**! ✨\n> يرجى الاطلاع على القوانين والتوجه للشات للتعرف على الأعضاء.'
+  },
+  {
+    name: 'تفاعلي مع الرتب والتكت',
+    desc: 'يوجه لاختيار الرتب والتذاكر',
+    text: 'حياك الله {user} في **{server}**! 🚀\n> أنت العضو رقم: **#{membercount}**\nتفضل باختيار رتبك وتفاعل معنا في الشات العام، ولأي استفسار افتح تذكرة دعم!'
+  },
+  {
+    name: 'رسمي ومختصر',
+    desc: 'صيغة رسمية واضحة وموجزة',
+    text: 'نرحب بانضمام {user} إلى **{server}** (العضو رقم #{membercount}).\nنرجو الالتزام بقواعد السيرفر والتواصل مع فريق الإدارة عند الحاجة.'
+  },
+  {
+    name: 'مجتمع الألعاب والفعاليات',
+    desc: 'حماسي للألعاب ومسابقات السيرفر',
+    text: '🔥 مرحباً {user} في مجتمع **{server}**!\n🎮 اكتمل الفريق بك لتصبح العضو رقم **#{membercount}**!\n- تفقد رومات الألعاب والصوتيات\n- شارك في الفعاليات والبطولات 🏆'
+  }
+];
+
+function insertPlaceholderAtCursor(textarea, placeholder) {
+  if (!textarea) return;
+  const start = textarea.selectionStart ?? textarea.value.length;
+  const end = textarea.selectionEnd ?? textarea.value.length;
+  const text = textarea.value;
+  textarea.value = text.substring(0, start) + placeholder + text.substring(end);
+  textarea.selectionStart = textarea.selectionEnd = start + placeholder.length;
+  textarea.focus();
+  textarea.dispatchEvent(new Event('input', { bubbles: true }));
+}
+
+function wrapSelectionWith(textarea, before, after) {
+  if (!textarea) return;
+  const start = textarea.selectionStart ?? textarea.value.length;
+  const end = textarea.selectionEnd ?? textarea.value.length;
+  const text = textarea.value;
+  const selected = text.substring(start, end) || 'نص';
+  textarea.value = text.substring(0, start) + before + selected + after + text.substring(end);
+  textarea.selectionStart = start + before.length;
+  textarea.selectionEnd = start + before.length + selected.length;
+  textarea.focus();
+  textarea.dispatchEvent(new Event('input', { bubbles: true }));
+}
+
+function applyFormatCommand(textarea, cmd) {
+  if (!textarea) return;
+  const start = textarea.selectionStart ?? textarea.value.length;
+  const end = textarea.selectionEnd ?? textarea.value.length;
+  const text = textarea.value;
+  const selected = text.substring(start, end);
+
+  if (cmd === 'bold') wrapSelectionWith(textarea, '**', '**');
+  else if (cmd === 'italic') wrapSelectionWith(textarea, '*', '*');
+  else if (cmd === 'underline') wrapSelectionWith(textarea, '__', '__');
+  else if (cmd === 'strike') wrapSelectionWith(textarea, '~~', '~~');
+  else if (cmd === 'spoiler') wrapSelectionWith(textarea, '||', '||');
+  else if (cmd === 'code') wrapSelectionWith(textarea, '`', '`');
+  else if (cmd === 'codeblock') wrapSelectionWith(textarea, '```\n', '\n```');
+  else if (cmd === 'quote') {
+    const val = selected || 'نص الاقتباس';
+    const lines = val.split('\n').map(l => '> ' + l).join('\n');
+    textarea.value = text.substring(0, start) + lines + text.substring(end);
+    textarea.selectionStart = start;
+    textarea.selectionEnd = start + lines.length;
+    textarea.focus();
+    textarea.dispatchEvent(new Event('input', { bubbles: true }));
+  } else if (cmd === 'h1') {
+    const val = selected || 'عنوان رئيسي';
+    textarea.value = text.substring(0, start) + '# ' + val + text.substring(end);
+    textarea.selectionStart = start + 2;
+    textarea.selectionEnd = start + 2 + val.length;
+    textarea.focus();
+    textarea.dispatchEvent(new Event('input', { bubbles: true }));
+  } else if (cmd === 'h2') {
+    const val = selected || 'عنوان فرعي';
+    textarea.value = text.substring(0, start) + '## ' + val + text.substring(end);
+    textarea.selectionStart = start + 3;
+    textarea.selectionEnd = start + 3 + val.length;
+    textarea.focus();
+    textarea.dispatchEvent(new Event('input', { bubbles: true }));
+  } else if (cmd === 'list') {
+    const val = selected || 'عنصر في القائمة';
+    const lines = val.split('\n').map(l => '- ' + l).join('\n');
+    textarea.value = text.substring(0, start) + lines + text.substring(end);
+    textarea.selectionStart = start;
+    textarea.selectionEnd = start + lines.length;
+    textarea.focus();
+    textarea.dispatchEvent(new Event('input', { bubbles: true }));
+  }
+}
+
+function parseDiscordMarkdown(text, guildName = 'سيرفر ZETA', memberCount = 154) {
+  if (!text || !text.trim()) {
+    return '<span style="color:#949ba4;font-style:italic">اكتب رسالتك في المحرر لتظهر المعاينة المباشرة هنا...</span>';
+  }
+  let s = esc(text);
+  
+  // Placeholders with realistic Discord styling
+  s = s.replace(/\{user\}|\{mention\}/gi, '<span class="discord-mention" title="منشن العضو (يذكر العضو تلقائياً)">@عضو جديد</span>');
+  s = s.replace(/\{username\}/gi, '<span class="discord-mention" style="background:rgba(255,255,255,0.08);color:#f2f3f5" title="اسم العضو بدون منشن">عضو جديد</span>');
+  s = s.replace(/\{server\}/gi, `<span class="discord-server-highlight" title="اسم السيرفر">${esc(guildName)}</span>`);
+  s = s.replace(/\{membercount\}/gi, `<span class="discord-count-highlight" title="رقم العضو">#${esc(memberCount)}</span>`);
+  
+  // Multiline Code Blocks: ```code```
+  s = s.replace(/```(?:[a-z0-9_-]+)?\n?([\s\S]+?)```/g, '<pre class="discord-code-block"><code>$1</code></pre>');
+
+  // Spoilers: ||text||
+  s = s.replace(/\|\|([\s\S]+?)\|\|/g, '<span class="discord-spoiler" title="انقر للإظهار / الإخفاء" onclick="this.classList.toggle(\'revealed\')">$1</span>');
+  // Bold + Italic: ***text***
+  s = s.replace(/\*\*\*([\s\S]+?)\*\*\*/g, '<strong><em>$1</em></strong>');
+  // Bold: **text**
+  s = s.replace(/\*\*([\s\S]+?)\*\*/g, '<strong>$1</strong>');
+  // Underline: __text__
+  s = s.replace(/__([\s\S]+?)__/g, '<u>$1</u>');
+  // Italic: *text*
+  s = s.replace(/\*([\s\S]+?)\*/g, '<em>$1</em>');
+  // Strikethrough: ~~text~~
+  s = s.replace(/~~([\s\S]+?)~~/g, '<s>$1</s>');
+  // Inline Code: `code`
+  s = s.replace(/`([^`]+)`/g, '<code class="discord-inline-code">$1</code>');
+  // Blockquote lines, headings, subtext, lists
+  s = s.split('\n').map(line => {
+    const trimmed = line.trim();
+    if (trimmed.startsWith('# ')) {
+      return `<h1 class="discord-h1">${line.replace(/^\s*#\s*/, '')}</h1>`;
+    }
+    if (trimmed.startsWith('## ')) {
+      return `<h2 class="discord-h2">${line.replace(/^\s*##\s*/, '')}</h2>`;
+    }
+    if (trimmed.startsWith('### ')) {
+      return `<h3 class="discord-h3">${line.replace(/^\s*###\s*/, '')}</h3>`;
+    }
+    if (trimmed.startsWith('-# ')) {
+      return `<div class="discord-subtext">${line.replace(/^\s*-#\s*/, '')}</div>`;
+    }
+    if (trimmed.startsWith('&gt;')) {
+      return `<div class="discord-quote">${line.replace(/^\s*&gt;\s*/, '')}</div>`;
+    }
+    if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
+      return `<div class="discord-list-item">• ${line.replace(/^\s*[-*]\s*/, '')}</div>`;
+    }
+    return line;
+  }).join('\n');
+  
+  return s;
+}
+
+function welcomeJoinForm(d,ch){
+  const w=d.welcome||{},l=d.leave||{};
+  const guildName=state.guild?.name||'سيرفر ZETA';
+  const memberCount=state.guild?.memberCount||154;
+  const initialMsg=w.message||'أهلاً بك يا {user} في سيرفر **{server}**! 🎉 أنت العضو رقم **#{membercount}**.';
+  const initialLeave=l.message||'وداعاً {user}، نتمنى لك التوفيق!';
+
+  return `<div class="welcome-page" dir="rtl">
+    <form id="welcomeJoinForm">
+      <div class="welcome-grid">
+        <!-- Main Configuration & Rich Text Editor Column -->
+        <div class="welcome-controls">
+          <section class="v-card">
+            <div class="welcome-card-header">
+              <div>
+                <h2>👋 محرر رسائل الترحيب المخصص (Rich-Text Editor)</h2>
+                <p class="v-muted" style="margin-top:4px;font-size:13px">خصص رسالة الترحيب التفاعلية والمتغيرات المدمجة مع معاينة حية لشات Discord.</p>
+              </div>
+              <div class="welcome-toggle-box">
+                <label class="v-check" style="margin:0;cursor:pointer">
+                  <input type="checkbox" name="welcome.enabled" id="welcomeEnabledToggle" ${w.enabled!==false?'checked':''}>
+                  <b style="font-size:13px;color:var(--vx-blue-2)">تفعيل الترحيب</b>
+                </label>
+              </div>
+            </div>
+
+            <!-- Channel Selector -->
+            <div style="margin-bottom:18px">
+              <label class="v-field">
+                <span style="font-weight:700;display:flex;align-items:center;gap:6px">
+                  <span>#</span> روم إرسال الترحيب
+                </span>
+                <select name="welcome.channelId" id="welcomeChannelSelect">
+                  ${channelOptionsHtml(ch,w.channelId||'')}
+                </select>
+              </label>
+            </div>
+
+            <!-- Rich-Text Editor Component -->
+            <div class="v-field">
+              <span style="font-weight:700;display:flex;align-items:center;justify-content:space-between">
+                <span>نص رسالة الترحيب</span>
+                <small class="v-muted" style="font-size:11px">يدعم تنسيقات ماركداون واختصارات لوحة المفاتيح</small>
+              </span>
+
+              <div class="rte-box" id="welcomeRteBox">
+                <!-- Placeholder insertion chips -->
+                <div class="rte-placeholders-header">
+                  <span>⚡ المتغيرات التلقائية المتاحة (انقر للإدراج في موضع المؤشر):</span>
+                  <span style="font-size:11px;color:var(--vx-blue)">{user} · {server} · {membercount}</span>
+                </div>
+                <div class="rte-placeholders-row">
+                  <button type="button" class="rte-chip" data-insert-placeholder="{user}" title="يذكر العضو بمنشن تفاعلي @User">
+                    <code>+ {user}</code>
+                    <span class="rte-chip-label">منشن العضو</span>
+                  </button>
+                  <button type="button" class="rte-chip" data-insert-placeholder="{server}" title="يعرض اسم السيرفر الحالي">
+                    <code>+ {server}</code>
+                    <span class="rte-chip-label">اسم السيرفر</span>
+                  </button>
+                  <button type="button" class="rte-chip" data-insert-placeholder="{membercount}" title="يعرض رقم وترتيب العضو الإجمالي في السيرفر">
+                    <code>+ {membercount}</code>
+                    <span class="rte-chip-label">عدد الأعضاء</span>
+                  </button>
+                  <button type="button" class="rte-chip" data-insert-placeholder="{username}" title="اسم العضو كنص مجرد بدون منشن">
+                    <code>+ {username}</code>
+                    <span class="rte-chip-label">اسم العضو</span>
+                  </button>
+                  <button type="button" class="rte-chip" data-insert-placeholder="{mention}" title="منشن العضو (بديل)">
+                    <code>+ {mention}</code>
+                    <span class="rte-chip-label">منشن بديل</span>
+                  </button>
+                </div>
+
+                <!-- Formatting Toolbar -->
+                <div class="rte-toolbar">
+                  <button type="button" class="rte-tool-btn" data-format-cmd="bold" title="عريض (**نص**) — Ctrl+B"><b>B</b></button>
+                  <button type="button" class="rte-tool-btn" data-format-cmd="italic" title="مائل (*نص*) — Ctrl+I"><i>I</i></button>
+                  <button type="button" class="rte-tool-btn" data-format-cmd="underline" title="تسطير (__نص__) — Ctrl+U"><u>U</u></button>
+                  <button type="button" class="rte-tool-btn" data-format-cmd="strike" title="شطب (~~نص~~)"><s>S</s></button>
+                  <span class="rte-tool-sep"></span>
+                  <button type="button" class="rte-tool-btn" data-format-cmd="h1" title="عنوان كبير (# عنوان)">H1</button>
+                  <button type="button" class="rte-tool-btn" data-format-cmd="h2" title="عنوان فرعي (## عنوان)">H2</button>
+                  <span class="rte-tool-sep"></span>
+                  <button type="button" class="rte-tool-btn" data-format-cmd="code" title="كود مضمن (\`كود\`)">&lt;/&gt;</button>
+                  <button type="button" class="rte-tool-btn" data-format-cmd="codeblock" title="كتلة برمجية (\`\`\`كود\`\`\`)">{ }</button>
+                  <button type="button" class="rte-tool-btn" data-format-cmd="quote" title="اقتباس (&gt; نص)">❝</button>
+                  <button type="button" class="rte-tool-btn" data-format-cmd="list" title="قائمة نقطية (- عنصر)">• List</button>
+                  <button type="button" class="rte-tool-btn" data-format-cmd="spoiler" title="حرق (||نص||)">||</button>
+                  <span class="rte-tool-sep"></span>
+                  <button type="button" class="rte-tool-btn" data-insert-emoji="🎉" title="إدراج 🎉">🎉</button>
+                  <button type="button" class="rte-tool-btn" data-insert-emoji="👋" title="إدراج 👋">👋</button>
+                  <button type="button" class="rte-tool-btn" data-insert-emoji="✨" title="إدراج ✨">✨</button>
+                  <button type="button" class="rte-tool-btn" data-insert-emoji="🚀" title="إدراج 🚀">🚀</button>
+                  <button type="button" class="rte-tool-btn" data-insert-emoji="👑" title="إدراج 👑">👑</button>
+                  <button type="button" class="rte-tool-btn" data-insert-emoji="🛡️" title="إدراج 🛡️">🛡️</button>
+                  <button type="button" class="rte-tool-btn" data-insert-emoji="💎" title="إدراج 💎">💎</button>
+                  <button type="button" class="rte-tool-btn" data-insert-emoji="❤️" title="إدراج ❤️">❤️</button>
+                  <span class="rte-tool-sep"></span>
+                  <button type="button" class="rte-tool-btn" data-rte-clear title="مسح النص" style="color:var(--vx-red);font-size:12px">🧹 مسح</button>
+                </div>
+
+                <!-- Textarea Editor -->
+                <textarea 
+                  name="welcome.message" 
+                  id="welcomeMessageInput" 
+                  class="rte-textarea" 
+                  rows="6" 
+                  placeholder="اكتب رسالة الترحيب هنا... يمكنك استخدام {user} لمنشن العضو، {server} لاسم السيرفر، و {membercount} لعدد الأعضاء."
+                  spellcheck="false"
+                >${esc(initialMsg)}</textarea>
+
+                <!-- Editor Footer with live indicators -->
+                <div class="rte-footer">
+                  <div class="rte-tags-detected" id="welcomeDetectedTags">
+                    <!-- populated dynamically -->
+                  </div>
+                  <div class="rte-char-count">
+                    <span id="welcomeCharCount">0</span> / 2000 حرف
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Quick Starter Templates -->
+            <div class="rte-templates-box">
+              <div class="rte-templates-title">
+                <span>📚 قوالب رسائل ترحيبية جاهزة (انقر للاستخدام الفوري):</span>
+                <span style="font-size:11px;font-weight:normal;color:var(--vx-ink-3)">تتضمن المتغيرات {user} و {server} و {membercount}</span>
+              </div>
+              <div class="rte-templates-grid">
+                ${WELCOME_TEMPLATES.map((tpl, i) => `
+                  <button type="button" class="rte-template-card" data-apply-template="${i}">
+                    <b>${esc(tpl.name)}</b>
+                    <small>${esc(tpl.desc)}</small>
+                  </button>
+                `).join('')}
+              </div>
+            </div>
+
+            <!-- Custom Welcome Image Card Section -->
+            <div style="margin-top:24px;padding-top:20px;border-top:1px solid var(--vx-line)">
+              <h3 style="margin:0 0 8px;font-size:15px;display:flex;align-items:center;gap:6px">
+                <span>🖼️</span> بطاقة الترحيب الصورية (Welcome Card)
+              </h3>
+              <p class="v-muted" style="margin-bottom:14px;font-size:12.5px">
+                يمكن للبوت إنشاء بطاقة ترحيبية عالية الدقة تلقائياً تحتوي على صورة خلفيتك وصورة العضو واسمه.
+              </p>
+              
+              <div class="v-grid two">
+                ${imageField('welcomeBackground', 'صورة خلفية بطاقة الترحيب (رابط أو رفع ملف)', w.backgroundImage || '')}
+                ${input('النص المخصص المطبوع على البطاقة', 'welcome.cardText', w.cardText || '', 'text', 'placeholder="مثال: مرحباً بك في السيرفر"')}
+                <label class="v-field">
+                  <span>موضع صورة العضو الأفقية X: <b id="avatarXValue">${Number.isFinite(w.avatarX) ? w.avatarX : 50}%</b></span>
+                  <input type="range" name="welcome.avatarX" id="avatarXSlider" min="10" max="90" value="${Number.isFinite(w.avatarX) ? w.avatarX : 50}">
+                </label>
+                <label class="v-field">
+                  <span>موضع صورة العضو الرأسية Y: <b id="avatarYValue">${Number.isFinite(w.avatarY) ? w.avatarY : 25}%</b></span>
+                  <input type="range" name="welcome.avatarY" id="avatarYSlider" min="10" max="90" value="${Number.isFinite(w.avatarY) ? w.avatarY : 25}">
+                </label>
+              </div>
+            </div>
+
+            <!-- Leave Message Section -->
+            <div style="margin-top:24px;padding-top:20px;border-top:1px solid var(--vx-line)">
+              <div class="welcome-card-header" style="margin-bottom:14px;border:none;padding:0">
+                <h3 style="margin:0;font-size:15px;display:flex;align-items:center;gap:6px">
+                  <span>🚪</span> رسالة المغادرة (Leave Message)
+                </h3>
+                <label class="v-check" style="margin:0">
+                  <input type="checkbox" name="leave.enabled" id="leaveEnabledToggle" ${l.enabled ? 'checked' : ''}>
+                  <span style="font-size:12.5px">تفعيل رسالة المغادرة</span>
+                </label>
+              </div>
+
+              <div class="v-grid two" style="margin-bottom:12px">
+                <label class="v-field">
+                  <span>روم رسائل المغادرة</span>
+                  <select name="leave.channelId">
+                    ${channelOptionsHtml(ch, l.channelId || '')}
+                  </select>
+                </label>
+              </div>
+
+              <div class="v-field">
+                <div class="rte-placeholders-row" style="border-radius:10px 10px 0 0;border:1px solid var(--vx-line);border-bottom:none">
+                  <button type="button" class="rte-chip" data-insert-leave="{user}">
+                    <code>+ {user}</code>
+                    <span class="rte-chip-label">اسم العضو</span>
+                  </button>
+                  <button type="button" class="rte-chip" data-insert-leave="{server}">
+                    <code>+ {server}</code>
+                    <span class="rte-chip-label">اسم السيرفر</span>
+                  </button>
+                  <button type="button" class="rte-chip" data-insert-leave="{membercount}">
+                    <code>+ {membercount}</code>
+                    <span class="rte-chip-label">عدد الأعضاء</span>
+                  </button>
+                </div>
+                <textarea 
+                  name="leave.message" 
+                  id="leaveMessageInput" 
+                  class="rte-textarea" 
+                  style="border:1px solid var(--vx-line);border-radius:0 0 10px 10px;min-height:90px" 
+                  placeholder="رسالة المغادرة... مثال: غادرنا {user}، وداعاً نتمنى لك التوفيق!"
+                >${esc(initialLeave)}</textarea>
+              </div>
+            </div>
+
+            <!-- Actions Bar -->
+            <div class="v-actions rte-actions-row" style="margin-top:24px;padding-top:16px;border-top:1px solid var(--vx-line)">
+              ${formButton('حفظ إعدادات الترحيب والمغادرة')}
+              <button type="button" class="v-btn rte-test-btn" id="btnTestWelcome">
+                <span>🧪</span> إرسال رسالة تجريبية
+              </button>
+            </div>
+          </section>
+        </div>
+
+        <!-- Live Realistic Discord Preview Column -->
+        <div class="welcome-preview-column">
+          <div class="discord-preview-wrap">
+            <!-- Channel Bar -->
+            <div class="discord-preview-bar">
+              <div class="discord-preview-channel">
+                <span style="color:#80848e">#</span>
+                <span id="previewChannelName">welcome</span>
+              </div>
+              <span style="font-size:11px;color:#80848e">معاينة مباشرة لشات Discord</span>
+            </div>
+
+            <!-- Message Area -->
+            <div class="discord-preview-inner">
+              <img class="discord-bot-avatar" src="/dashboard/images/logo.png" alt="ZETA">
+              <div class="discord-msg-content">
+                <div class="discord-msg-header">
+                  <span class="discord-bot-name">ZETA</span>
+                  <span class="discord-bot-tag">BOT ✓</span>
+                  <span class="discord-msg-time">اليوم في 12:30 م</span>
+                </div>
+                <div class="discord-msg-text" id="discordPreviewMessageText">
+                  <!-- Live rendered message markdown -->
+                </div>
+              </div>
+            </div>
+
+            <!-- Graphical Card Preview (if image card used) -->
+            <div class="discord-card-preview-sub" id="cardGraphicPreviewSection">
+              <div style="padding:0 16px 10px;font-size:11px;color:#949ba4;font-weight:700">
+                بطاقة الترحيب الصورية المرفقة:
+              </div>
+              <div style="padding:0 16px 16px">
+                <div class="welcome-preview" id="liveWelcomeCardPreview">
+                  <div class="welcome-preview-avatar" id="liveAvatarMarker" style="left:${Number.isFinite(w.avatarX) ? w.avatarX : 50}%;top:${Number.isFinite(w.avatarY) ? w.avatarY : 25}%">
+                    <img src="/assets/bot-avatar.png" alt="Avatar">
+                  </div>
+                  <div class="welcome-preview-text">
+                    <b id="liveCardCustomText">${esc(w.cardText || 'WELCOME')}</b>
+                    <small id="liveCardSubText">${esc(guildName)} · العضو رقم #${esc(memberCount)}</small>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>`;
+}
 
 function componentForm(d){return `<div class="v-card inner"><h3>☷ إنشاء لوحة</h3><p class="v-muted">يمكنك الآن رفع صورة اللوحة من جهازك بدل لصق رابط يدوي.</p><form id="componentCreateForm"><div class="v-grid two">${input('اسم اللوحة','componentName','','text','required')}${input('العنوان','componentTitle')}${textarea('الوصف','componentDescription')}${input('اللون','componentColor','#5865f2')}${imageField('componentImage','صورة اللوحة','')}${input('الفوتر','componentFooter')}</div><div class="v-actions"><button class="v-btn primary" type="submit">إنشاء اللوحة</button></div></form></div><section class="v-card"><div class="v-card-head"><h2>اللوحات الحالية</h2></div>${(d.components||d.panels||[]).map(x=>`<div class="v-item"><b>${esc(x.name||x.title||'Panel')}</b><span>${esc(x.channelId||'')}</span></div>`).join('')||empty('لا توجد لوحات.')}</section>`}
 
@@ -382,8 +1066,244 @@ function bindPage(page){
     try{await api(`/admin/${state.guild.id}${endpointMap[page][0]}`,{method:'POST',body:JSON.stringify(o)});toast('تم الحفظ بنجاح ✓');}catch(err){toast(err.message,true)}
   });
   if(page==='welcomejoin'){
-    const wf=app.querySelector('#welcomeJoinForm');
-    wf?.addEventListener('submit',async e=>{e.preventDefault();const o=formDataObj(wf);const payload={welcome:{enabled:o['welcome.enabled'],channelId:o['welcome.channelId'],message:o['welcome.message'],backgroundImage:o['welcomeBackground']||'',cardText:o['welcome.cardText'],avatarX:Number(o['welcome.avatarX'])||0,avatarY:Number(o['welcome.avatarY'])||0},leave:{enabled:o['leave.enabled'],channelId:o['leave.channelId'],message:o['leave.message']}};try{await api(`/admin/${state.guild.id}/settings`,{method:'POST',body:JSON.stringify(payload)});toast('تم حفظ الترحيب والصور ✓')}catch(err){toast(err.message,true)}});
+    const wf = app.querySelector('#welcomeJoinForm');
+    const msgInput = app.querySelector('#welcomeMessageInput');
+    const previewText = app.querySelector('#discordPreviewMessageText');
+    const charCountEl = app.querySelector('#welcomeCharCount');
+    const detectedTagsEl = app.querySelector('#welcomeDetectedTags');
+    const channelSelect = app.querySelector('#welcomeChannelSelect');
+    const previewChannel = app.querySelector('#previewChannelName');
+    const cardBgInput = app.querySelector('#welcomeBackground');
+    const cardTextInput = app.querySelector('input[name="welcome.cardText"]');
+    const liveCardPreview = app.querySelector('#liveWelcomeCardPreview');
+    const liveAvatarMarker = app.querySelector('#liveAvatarMarker');
+    const liveCardCustomText = app.querySelector('#liveCardCustomText');
+    const sliderX = app.querySelector('#avatarXSlider');
+    const sliderY = app.querySelector('#avatarYSlider');
+    const sliderXVal = app.querySelector('#avatarXValue');
+    const sliderYVal = app.querySelector('#avatarYValue');
+    const leaveInput = app.querySelector('#leaveMessageInput');
+
+    const guildName = state.guild?.name || 'سيرفر ZETA';
+    const memberCount = state.guild?.memberCount || 154;
+
+    const updateWelcomePreview = () => {
+      if (!msgInput) return;
+      const text = msgInput.value;
+      
+      // Update Discord message simulation
+      if (previewText) {
+        previewText.innerHTML = parseDiscordMarkdown(text, guildName, memberCount);
+      }
+
+      // Update character counter
+      if (charCountEl) {
+        charCountEl.textContent = text.length;
+        charCountEl.style.color = text.length > 2000 ? 'var(--vx-red)' : text.length > 1800 ? 'var(--vx-amber)' : 'var(--vx-ink-2)';
+      }
+
+      // Update detected tags
+      if (detectedTagsEl) {
+        const hasUser = /\{user\}|\{mention\}/i.test(text);
+        const hasServer = /\{server\}/i.test(text);
+        const hasCount = /\{membercount\}/i.test(text);
+        const hasUsername = /\{username\}/i.test(text);
+
+        const pills = [];
+        if (hasUser) pills.push('<span class="rte-detected-badge">✓ {user} منشن</span>');
+        if (hasServer) pills.push('<span class="rte-detected-badge">✓ {server} السيرفر</span>');
+        if (hasCount) pills.push('<span class="rte-detected-badge">✓ {membercount} العدد</span>');
+        if (hasUsername) pills.push('<span class="rte-detected-badge">✓ {username} الاسم</span>');
+        detectedTagsEl.innerHTML = pills.length ? pills.join('') : '<span style="color:var(--vx-ink-3);font-size:11px">لم يتم تضمين متغيرات بعد</span>';
+      }
+
+      // Update Channel Name
+      if (channelSelect && previewChannel) {
+        const opt = channelSelect.options[channelSelect.selectedIndex];
+        previewChannel.textContent = opt && opt.text ? opt.text.replace(/^[#\s]+/, '') : 'welcome';
+      }
+
+      // Update Card Visual Preview
+      if (liveCardCustomText && cardTextInput) {
+        const cText = cardTextInput.value.trim() || 'WELCOME';
+        liveCardCustomText.textContent = cText
+          .replace(/\{user\}|\{mention\}|\{username\}/gi, 'عضو جديد')
+          .replace(/\{server\}/gi, guildName)
+          .replace(/\{membercount\}/gi, memberCount);
+      }
+      if (liveCardPreview && cardBgInput) {
+        if (cardBgInput.value.trim()) {
+          liveCardPreview.style.backgroundImage = `url("${cardBgInput.value.trim()}")`;
+        } else {
+          liveCardPreview.style.backgroundImage = '';
+        }
+      }
+      if (sliderX && sliderY && liveAvatarMarker) {
+        liveAvatarMarker.style.left = `${sliderX.value}%`;
+        liveAvatarMarker.style.top = `${sliderY.value}%`;
+      }
+    };
+
+    // Bind Placeholders for Welcome Message
+    app.querySelectorAll('[data-insert-placeholder]').forEach(btn => {
+      btn.onclick = () => {
+        const ph = btn.dataset.insertPlaceholder;
+        insertPlaceholderAtCursor(msgInput, ph);
+        updateWelcomePreview();
+        toast(`تم إدراج ${ph} ✓`);
+      };
+    });
+
+    // Bind Formatting Commands
+    app.querySelectorAll('[data-format-cmd]').forEach(btn => {
+      btn.onclick = () => {
+        const cmd = btn.dataset.formatCmd;
+        applyFormatCommand(msgInput, cmd);
+        updateWelcomePreview();
+      };
+    });
+
+    // Bind Emojis
+    app.querySelectorAll('[data-insert-emoji]').forEach(btn => {
+      btn.onclick = () => {
+        insertPlaceholderAtCursor(msgInput, btn.dataset.insertEmoji + ' ');
+        updateWelcomePreview();
+      };
+    });
+
+    // Bind Clear
+    app.querySelector('[data-rte-clear]')?.addEventListener('click', () => {
+      if (!confirm('هل أنت متأكد من مسح نص الرسالة؟')) return;
+      msgInput.value = '';
+      updateWelcomePreview();
+      msgInput.focus();
+    });
+
+    // Bind Template Application
+    app.querySelectorAll('[data-apply-template]').forEach(btn => {
+      btn.onclick = () => {
+        const idx = Number(btn.dataset.applyTemplate);
+        const tpl = WELCOME_TEMPLATES[idx];
+        if (tpl) {
+          msgInput.value = tpl.text;
+          updateWelcomePreview();
+          toast(`تم تطبيق قالب "${tpl.name}" ✓`);
+          msgInput.focus();
+        }
+      };
+    });
+
+    // Bind Keyboard Shortcuts in Textarea
+    msgInput?.addEventListener('keydown', e => {
+      if (e.ctrlKey || e.metaKey) {
+        if (e.key.toLowerCase() === 'b') {
+          e.preventDefault();
+          applyFormatCommand(msgInput, 'bold');
+          updateWelcomePreview();
+        } else if (e.key.toLowerCase() === 'i') {
+          e.preventDefault();
+          applyFormatCommand(msgInput, 'italic');
+          updateWelcomePreview();
+        } else if (e.key.toLowerCase() === 'u') {
+          e.preventDefault();
+          applyFormatCommand(msgInput, 'underline');
+          updateWelcomePreview();
+        } else if (e.shiftKey && e.key.toLowerCase() === 'x') {
+          e.preventDefault();
+          applyFormatCommand(msgInput, 'strike');
+          updateWelcomePreview();
+        } else if (e.shiftKey && e.key.toLowerCase() === 's') {
+          e.preventDefault();
+          applyFormatCommand(msgInput, 'spoiler');
+          updateWelcomePreview();
+        }
+      }
+    });
+
+    // Bind Test Welcome Message
+    app.querySelector('#btnTestWelcome')?.addEventListener('click', async () => {
+      const btn = app.querySelector('#btnTestWelcome');
+      if (!btn) return;
+      const orig = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = '<span>⏳</span> جاري الإرسال…';
+      try {
+        const res = await api(`/admin/${state.guild.id}/welcome/test`, {
+          method: 'POST',
+          body: JSON.stringify({
+            message: msgInput?.value,
+            channelId: channelSelect?.value
+          })
+        });
+        if (res.sent) {
+          toast(`✅ تم إرسال رسالة ترحيب تجريبية إلى #${res.channelName}`);
+        } else {
+          toast(res.note || 'تمت محاكاة رسالة الترحيب بنجاح ✓');
+        }
+      } catch (err) {
+        toast('خطأ في إرسال الرسالة التجريبية: ' + err.message, true);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = orig;
+      }
+    });
+
+    // Bind Input Listeners
+    msgInput?.addEventListener('input', updateWelcomePreview);
+    channelSelect?.addEventListener('change', updateWelcomePreview);
+    cardTextInput?.addEventListener('input', updateWelcomePreview);
+    cardBgInput?.addEventListener('input', updateWelcomePreview);
+
+    // Sliders
+    sliderX?.addEventListener('input', () => {
+      if (sliderXVal) sliderXVal.textContent = sliderX.value + '%';
+      updateWelcomePreview();
+    });
+    sliderY?.addEventListener('input', () => {
+      if (sliderYVal) sliderYVal.textContent = sliderY.value + '%';
+      updateWelcomePreview();
+    });
+
+    // Leave placeholders
+    app.querySelectorAll('[data-insert-leave]').forEach(btn => {
+      btn.onclick = () => {
+        if (leaveInput) {
+          insertPlaceholderAtCursor(leaveInput, btn.dataset.insertLeave);
+          toast(`تم إدراج ${btn.dataset.insertLeave} في رسالة المغادرة ✓`);
+        }
+      };
+    });
+
+    // Initial preview update
+    updateWelcomePreview();
+
+    // Form submission
+    wf?.addEventListener('submit', async e => {
+      e.preventDefault();
+      const o = formDataObj(wf);
+      const payload = {
+        welcome: {
+          enabled: Boolean(o['welcome.enabled']),
+          channelId: o['welcome.channelId'],
+          message: o['welcome.message'],
+          backgroundImage: o['welcomeBackground'] || '',
+          cardText: o['welcome.cardText'],
+          avatarX: Number(o['welcome.avatarX']) || 50,
+          avatarY: Number(o['welcome.avatarY']) || 25
+        },
+        leave: {
+          enabled: Boolean(o['leave.enabled']),
+          channelId: o['leave.channelId'],
+          message: o['leave.message']
+        }
+      };
+      try {
+        await api(`/admin/${state.guild.id}/settings`, { method: 'POST', body: JSON.stringify(payload) });
+        toast('تم حفظ إعدادات الترحيب والمغادرة بنجاح ✓');
+      } catch (err) {
+        toast(err.message, true);
+      }
+    });
   }
   const showLogSave=()=>app.querySelector('[data-log-savebar]')?.classList.remove('is-hidden');
   app.querySelectorAll('[data-log-enabled]').forEach(el=>el.addEventListener('change',()=>{el.closest('[data-log-card]')?.classList.toggle('is-enabled',el.checked);showLogSave()}));

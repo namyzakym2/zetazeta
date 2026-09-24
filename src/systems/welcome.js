@@ -18,7 +18,9 @@ async function handleMemberAdd(member) {
   const channel = member.guild.channels.cache.get(guildDoc.welcome.channelId);
   if (!channel?.isTextBased()) return;
 
-  const message = guildDoc.welcome.message
+  const rawMessage = guildDoc.welcome.message || '';
+  const message = rawMessage
+    .replaceAll('{user}', `<@${member.id}>`)
     .replaceAll('{mention}', `<@${member.id}>`)
     .replaceAll('{username}', member.user.username)
     .replaceAll('{server}', member.guild.name)
@@ -70,6 +72,9 @@ async function handleGreet(member, usedInvite) {
   const content = String(config.message)
     .replaceAll('{server}', member.guild.name)
     .replaceAll('{user}', `<@${member.id}>`)
+    .replaceAll('{mention}', `<@${member.id}>`)
+    .replaceAll('{username}', member.user.username)
+    .replaceAll('{membercount}', String(member.guild.memberCount))
     .replaceAll('{invited}', invited);
 
   try {

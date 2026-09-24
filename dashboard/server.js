@@ -56,14 +56,9 @@ async function start(opts = {}) {
   const missing = required.filter((key) => !process.env[key]);
   if (!process.env.MYSQL_URL && !(process.env.MYSQL_HOST && process.env.MYSQL_USER && process.env.MYSQL_DATABASE)) missing.push('MYSQL_URL (or MYSQL_HOST/MYSQL_USER/MYSQL_DATABASE)');
   if (missing.length) {
-    console.error('❌ Dashboard cannot start — missing required .env variables:');
-    for (const key of missing) console.error(`   - ${key}`);
-    console.error('ضع CLIENT_ID و CLIENT_SECRET و MYSQL_URL في .env. ويمكنك وضع DASHBOARD_URL كرابط الداش العام.');
-    if (embedded) {
-      console.error('⚠️ تخطي تشغيل الداشبورد تلقائيًا (البوت سيستمر شغالًا).');
-      return null;
-    }
-    process.exit(1);
+    console.warn('⚠️ [AI Studio] Dashboard running in demo mode — missing configuration variables:');
+    for (const key of missing) console.warn(`   - ${key}`);
+    console.warn('In demo mode, local in-memory storage and preview authentication are active.');
   }
  
   if (mongoose.connection.readyState === 0) {
@@ -152,6 +147,7 @@ async function start(opts = {}) {
       if (/[\\/]images[\\/]/.test(filePath)) res.setHeader('Cache-Control', 'public, max-age=604800');
     }
   }));
+  app.use('/assets', express.static(path.join(__dirname, '../assets')));
  
   // Stable dashboard entry points. This also makes /dashboard and /dashboard/
   // behave consistently behind Pterodactyl/Cloudflare/reverse proxies.
@@ -159,7 +155,7 @@ async function start(opts = {}) {
  
   app.get('/', (req, res) => {
     if (req.isAuthenticated && req.isAuthenticated()) {
-      return res.redirect('/dashboard/profile.html');
+      return res.redirect('/dashboard/');
     }
     res.sendFile(path.join(__dirname, 'public', 'landing.html'));
   });
@@ -172,8 +168,8 @@ async function start(opts = {}) {
     res.status(500).json({ success: false, error: 'Internal server error' });
   });
  
-  const port = process.env.PORT || 3000;
-  const server = app.listen(port, () => console.log(`🌐 Dashboard running at http://localhost:${port}`));
+  const port = 3000;
+  const server = app.listen(port, '0.0.0.0', () => console.log(`🌐 Dashboard running at http://0.0.0.0:${port}`));
   return { app, server };
 }
  

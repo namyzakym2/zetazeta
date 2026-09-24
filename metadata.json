@@ -1,0 +1,8 @@
+{
+  "name": "ZETA Discord Bot & Dashboard",
+  "description": "ZETA - Discord economy, moderation, tickets bot with web dashboard",
+  "permissions": [],
+  "capabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

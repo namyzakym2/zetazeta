@@ -285,8 +285,8 @@
         run: () => window.selectTab && window.selectTab(it.id)
       });
     });
-    out.push({ id: '_servers', label: 'سيرفراتي', group: 'حسابي', icon: 'server', hay: norm('سيرفراتي servers حسابي'), run: () => (location.href = '/dashboard/profile.html') });
-    out.push({ id: '_profile', label: 'ملفي الشخصي', group: 'حسابي', icon: 'adduser', hay: norm('ملفي الشخصي profile حسابي'), run: () => (location.href = '/dashboard/profile.html') });
+    out.push({ id: '_servers', label: 'سيرفراتي', group: 'حسابي', icon: 'server', hay: norm('سيرفراتي servers حسابي'), run: () => { document.getElementById('serverPickerBtn')?.click(); } });
+    out.push({ id: '_profile', label: 'ملفي الشخصي', group: 'حسابي', icon: 'adduser', hay: norm('ملفي الشخصي profile حسابي'), run: () => { if (window.state?.me) { toast(`👤 ${window.state.me.username} | ID: ${window.state.me.id}`); } } });
     return out;
   }
   function renderPalette() {

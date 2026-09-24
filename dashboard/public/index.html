@@ -3,10 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#f3f6fc" />
-  <title>ZETA — لوحة التحكم</title>
+  <meta name="theme-color" content="#070c0a" />
+  <title>ZETA Bot — لوحة التحكم المتطورة</title>
+  <meta name="description" content="ZETA Bot — لوحة تحكم متطورة للسيرفرات: الحماية الذكية، الترحيب، التذاكر، الأوتومود، والأنظمة الإدارية الاحترافية" />
+  <meta property="og:title" content="ZETA Bot — لوحة التحكم المتطورة" />
+  <meta property="og:description" content="ZETA Bot — لوحة تحكم متطورة للسيرفرات: الحماية الذكية، الترحيب، التذاكر، الأوتومود، والأنظمة الإدارية الاحترافية" />
   <link rel="icon" href="/dashboard/images/logo.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&family=Cairo:wght@600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" />
   <link rel="stylesheet" href="/dashboard/css/style.css" />
   <link rel="stylesheet" href="/dashboard/css/vx.css" />
 </head>
@@ -47,7 +52,7 @@
             <button class="vx-btn vx-btn-primary vx-btn-block" type="button" data-vx-soon>ترقية الآن</button>
           </div>
           <div class="vx-side-meta">
-            <a class="vx-back" href="/dashboard/profile.html"><span data-icon="arrowLeft"></span> سيرفراتي</a>
+            <a class="vx-back" href="/dashboard/"><span data-icon="arrowLeft"></span> سيرفراتي</a>
             <span>ZETA v9.0.0</span>
             <span class="vx-made">Made with <i data-icon="heart"></i> by ZETA Team</span>
           </div>
@@ -75,7 +80,7 @@
             <div class="vx-bell-menu" id="vxBellMenu" hidden></div>
           </div>
 
-          <a href="/dashboard/profile.html" class="vx-profile" id="topbarAvatar" title="ملفي الشخصي">
+          <a href="#" class="vx-profile" id="topbarAvatar" title="ملفي الشخصي" onclick="event.preventDefault()">
             <img id="topbarAvatarImg" src="/dashboard/images/logo.png" alt="" />
             <span class="vx-profile-copy"><b id="topbarUserName">المستخدم</b><small id="topbarUserRole">Owner</small></span>
             <span class="vx-profile-chev" data-icon="chevronDown"></span>

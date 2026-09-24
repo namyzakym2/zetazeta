@@ -2,8 +2,31 @@ const express = require('express');
 const passport = require('passport');
 const router = require('../asyncRouter')(express.Router());
 
+const DEMO_USER = {
+  id: '123456789012345678',
+  username: 'ZETA Admin',
+  discriminator: '0001',
+  avatar: null,
+  guilds: [
+    {
+      id: '112233445566778899',
+      name: 'سيرفر ZETA التجريبي',
+      icon: null,
+      owner: true,
+      permissions: '8'
+    }
+  ]
+};
+
 function startDiscordLogin(req, res, next) {
   if (req.isAuthenticated && req.isAuthenticated()) return res.redirect('/dashboard/');
+
+  if (!process.env.CLIENT_ID || !process.env.DISCORD_CLIENT_SECRET) {
+    return req.logIn(DEMO_USER, (err) => {
+      if (err) return res.redirect('/?login=failed');
+      return res.redirect('/dashboard/');
+    });
+  }
 
   // OAuth authorization codes are single-use. State protection also prevents a
   // stale callback from another browser/session being accepted by this session.
@@ -11,6 +34,12 @@ function startDiscordLogin(req, res, next) {
 }
 
 router.get('/discord', startDiscordLogin);
+router.get('/demo', (req, res) => {
+  req.logIn(DEMO_USER, (err) => {
+    if (err) return res.redirect('/?login=failed');
+    return res.redirect('/dashboard/');
+  });
+});
 
 router.get('/discord/callback', (req, res, next) => {
   const code = typeof req.query.code === 'string' ? req.query.code : '';

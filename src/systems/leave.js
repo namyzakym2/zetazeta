@@ -9,9 +9,13 @@ async function handleMemberRemove(member) {
   const channel = member.guild.channels.cache.get(guildDoc.leave.channelId);
   if (!channel?.isTextBased()) return;
 
-  const message = guildDoc.leave.message
+  const rawMessage = guildDoc.leave.message || '';
+  const message = rawMessage
+    .replaceAll('{user}', member.user.username)
+    .replaceAll('{mention}', member.user.username)
     .replaceAll('{username}', member.user.username)
-    .replaceAll('{server}', member.guild.name);
+    .replaceAll('{server}', member.guild.name)
+    .replaceAll('{membercount}', String(member.guild.memberCount));
 
   const panel = buildV2Panel({
     title: t(guildDoc.locale, 'leave.title'),

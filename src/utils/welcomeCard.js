@@ -173,6 +173,7 @@ async function generateWelcomeCard({
     // Custom text the admin typed in the dashboard, with the same {mention}/
     // {username}/{server}/{membercount} placeholders as the regular welcome message.
     const resolved = cardText
+      .replaceAll('{user}', username || '')
       .replaceAll('{mention}', username || '')
       .replaceAll('{username}', username || '')
       .replaceAll('{server}', serverName || '')

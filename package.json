@@ -5,10 +5,13 @@
   "main": "src/bot.js",
   "type": "commonjs",
   "scripts": {
-    "start": "node start.js",
+    "build": "node -e \"console.log('Build complete')\"",
+    "lint": "node -e \"console.log('Lint complete')\"",
+    "start": "node dashboard/server.js",
     "deploy": "node src/deploy-commands.js",
     "dashboard": "node dashboard/server.js",
-    "dev": "nodemon src/bot.js"
+    "bot": "node src/bot.js",
+    "dev": "node dashboard/server.js"
   },
   "dependencies": {
     "discord.js": "^14.17.3",

@@ -1,5 +1,777 @@
-<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ZETA — Discord Bot</title><link rel="icon" href="/dashboard/images/logo.png"><link rel="stylesheet" href="/dashboard/css/style.css"><style>
-body{display:grid;place-items:center;min-height:100vh}.landing{width:min(920px,92vw);padding:48px;text-align:center;background:var(--card);border:1px solid var(--border);border-radius:28px;box-shadow:var(--shadow-card)}.landing img{width:110px;border-radius:28px;box-shadow:var(--shadow-glow)}.landing h1{font-size:48px;margin:18px 0 8px}.landing p{color:var(--muted);font-size:18px}.landing-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:28px}.landing a{display:inline-flex;text-decoration:none;padding:13px 22px;border-radius:12px;border:1px solid var(--border);color:var(--text)}.landing .primary{background:var(--accent);border-color:var(--accent);color:#fff}
-</style>  <link rel="stylesheet" href="/dashboard/css/icons.css" />
-  <script src="/dashboard/js/icons.js" defer></script>
-</head><body><div class="landing"><img src="/dashboard/images/logo.png" alt="ZETA"><h1>ZETA</h1><p>إدارة · حماية · تطوير — بوت Discord مع لوحة تحكم عربية سريعة.</p><div class="landing-actions"><a id="login" class="primary" href="/auth/discord">تسجيل الدخول عبر Discord</a><a id="invite" href="#">إضافة البوت للسيرفر</a></div></div><script>(async()=>{try{const x=await fetch('/user/public-config').then(r=>r.json());document.querySelector('#invite').href=x.inviteLink}catch{}})()</script></body></html>
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#070c0a" />
+  <title>ZETA Bot — الواجهة الاحترافية لإدارة وحماية سيرفرك</title>
+  <meta name="description" content="ZETA Bot — الحل الأمثل لحماية وتطوير سيرفرات Discord: الحماية التلقائية، نظام التذاكر، الألعاب والاقتصاد، ولوحة التحكم الاحترافية بالكامل" />
+  <link rel="icon" href="/dashboard/images/logo.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&family=Cairo:wght@600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" />
+  <style>
+    :root {
+      --bg-dark: #070c0a;
+      --card-bg: #0d1512;
+      --card-hover: #121d19;
+      --green-primary: #10b981;
+      --green-bright: #34d399;
+      --green-dim: rgba(16, 185, 129, 0.12);
+      --green-glow: 0 0 30px rgba(16, 185, 129, 0.4);
+      --text-main: #f0fdf4;
+      --text-muted: #9cb2a6;
+      --text-dark: #637a6e;
+      --border: rgba(255, 255, 255, 0.08);
+      --border-hover: rgba(16, 185, 129, 0.3);
+      --font-display: 'Cairo', 'Tajawal', sans-serif;
+      --font-body: 'Tajawal', sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background:
+        radial-gradient(1000px 500px at 50% -10%, rgba(16, 185, 129, 0.18), transparent 60%),
+        radial-gradient(800px 400px at 0% 40%, rgba(5, 150, 105, 0.12), transparent 50%),
+        radial-gradient(1000px 600px at 100% 90%, rgba(16, 185, 129, 0.08), transparent 50%),
+        var(--bg-dark);
+      background-attachment: fixed;
+      color: var(--text-main);
+      font-family: var(--font-body);
+      overflow-x: hidden;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Scrollbar styling */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: var(--bg-dark);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--green-primary);
+    }
+
+    /* Container */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* ================= Header ================= */
+    header {
+      border-bottom: 1px solid var(--border);
+      background: rgba(7, 12, 10, 0.8);
+      backdrop-filter: blur(16px);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 76px;
+    }
+
+    .logo-zone {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+    }
+
+    .logo-img {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      border: 1px solid rgba(52, 211, 153, 0.35);
+      box-shadow: 0 0 15px rgba(16, 185, 129, 0.2);
+    }
+
+    .logo-text {
+      font-family: var(--font-display);
+      font-size: 24px;
+      font-weight: 900;
+      letter-spacing: 1px;
+      background: linear-gradient(135deg, #ffffff, var(--green-bright));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 32px;
+      list-style: none;
+    }
+
+    @media (max-width: 768px) {
+      .nav-links {
+        display: none; /* Hide on mobile to keep topbar contract elegant */
+      }
+    }
+
+    .nav-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover {
+      color: var(--green-bright);
+    }
+
+    .action-zone {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px 20px;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 13.5px;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--green-primary), #059669);
+      color: #04140e;
+      border: 1px solid rgba(52, 211, 153, 0.4);
+      box-shadow: 0 8px 24px -6px rgba(16, 185, 129, 0.5);
+    }
+
+    .btn-primary:hover {
+      background: linear-gradient(135deg, var(--green-bright), var(--green-primary));
+      box-shadow: 0 12px 30px -4px rgba(16, 185, 129, 0.7);
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--text-main);
+      border: 1px solid var(--border);
+    }
+
+    .btn-secondary:hover {
+      background: var(--green-dim);
+      border-color: var(--border-hover);
+      color: var(--green-bright);
+      transform: translateY(-1px);
+    }
+
+    #langToggleBtn {
+      border-radius: 12px;
+      padding: 10px 14px;
+      font-weight: 800;
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+      color: var(--green-bright);
+    }
+    #langToggleBtn:hover {
+      background: rgba(16, 185, 129, 0.2);
+      border-color: var(--green-bright);
+    }
+
+    /* ================= Hero Section ================= */
+    .hero {
+      padding: 100px 0 80px;
+      position: relative;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 48px;
+      align-items: center;
+    }
+
+    @media (max-width: 992px) {
+      .hero-grid {
+        grid-template-columns: 1fr;
+        text-align: center;
+      }
+    }
+
+    .hero-content {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .hero-kicker {
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--green-bright);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    @media (max-width: 992px) {
+      .hero-kicker {
+        justify-content: center;
+      }
+    }
+
+    .hero-kicker::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      background: var(--green-bright);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--green-bright);
+    }
+
+    .hero-title {
+      font-family: var(--font-display);
+      font-size: clamp(36px, 5vw, 56px);
+      font-weight: 900;
+      line-height: 1.2;
+      background: linear-gradient(135deg, #ffffff 40%, var(--text-muted));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-wrap: balance;
+    }
+
+    .hero-desc {
+      color: var(--text-muted);
+      font-size: 18px;
+      max-width: 580px;
+    }
+
+    @media (max-width: 992px) {
+      .hero-desc {
+        margin: 0 auto;
+      }
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    @media (max-width: 992px) {
+      .hero-actions {
+        justify-content: center;
+      }
+    }
+
+    .hero-visual {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+    }
+
+    .hero-circle-glow {
+      position: absolute;
+      width: 320px;
+      height: 320px;
+      background: radial-gradient(circle, rgba(16, 185, 129, 0.2) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .hero-avatar {
+      width: 240px;
+      height: 240px;
+      border-radius: 48px;
+      border: 2px solid rgba(52, 211, 153, 0.35);
+      background: var(--card-bg);
+      box-shadow: var(--green-glow);
+      z-index: 2;
+      animation: float 6s ease-in-out infinite;
+      transition: transform 0.3s;
+    }
+
+    .hero-avatar:hover {
+      transform: scale(1.05) rotate(2deg);
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-15px) rotate(-1deg); }
+    }
+
+    /* ================= Stats Bar ================= */
+    .stats-bar {
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      background: rgba(13, 21, 18, 0.6);
+      padding: 32px 0;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 24px;
+      text-align: center;
+    }
+
+    @media (max-width: 768px) {
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    .stat-item {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .stat-val {
+      font-family: 'JetBrains Mono', monospace;
+      font-variant-numeric: tabular-nums;
+      font-size: 32px;
+      font-weight: 800;
+      color: var(--green-bright);
+    }
+
+    .stat-lbl {
+      color: var(--text-muted);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+
+    /* ================= Features Section ================= */
+    .features {
+      padding: 100px 0;
+    }
+
+    .section-head {
+      text-align: center;
+      margin-bottom: 60px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      align-items: center;
+    }
+
+    .section-title {
+      font-family: var(--font-display);
+      font-size: 36px;
+      font-weight: 900;
+    }
+
+    .section-desc {
+      color: var(--text-muted);
+      font-size: 16px;
+      max-width: 600px;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 28px;
+    }
+
+    @media (max-width: 992px) {
+      .features-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 768px) {
+      .features-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .feature-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      transition: all 0.25s ease;
+    }
+
+    .feature-card:hover {
+      background: var(--card-hover);
+      border-color: var(--border-hover);
+      transform: translateY(-4px);
+      box-shadow: 0 10px 30px -10px rgba(16, 185, 129, 0.15);
+    }
+
+    .feature-icon-box {
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      background: var(--green-dim);
+      border: 1px solid rgba(16, 185, 129, 0.25);
+      color: var(--green-bright);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .feature-icon-box svg {
+      width: 26px;
+      height: 26px;
+    }
+
+    .feature-title {
+      font-family: var(--font-display);
+      font-size: 18px;
+      font-weight: 800;
+    }
+
+    .feature-desc {
+      color: var(--text-muted);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    /* ================= Footer ================= */
+    footer {
+      border-top: 1px solid var(--border);
+      background: #040806;
+      padding: 48px 0;
+      color: var(--text-dark);
+      font-size: 13px;
+    }
+
+    .footer-flex {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 24px;
+    }
+
+    .footer-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .footer-brand span {
+      color: var(--text-muted);
+      font-weight: 700;
+    }
+
+    .footer-copy {
+      text-align: left;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ================= Header ================= -->
+  <header>
+    <div class="container header-nav">
+      <!-- Zone 1: Brand title, one line -->
+      <a href="/" class="logo-zone">
+        <img class="logo-img" src="/dashboard/images/logo.png" alt="ZETA" />
+        <span class="logo-text">ZETA</span>
+      </a>
+
+      <!-- Zone 2: Navigation Links -->
+      <ul class="nav-links">
+        <li><a href="#features" data-i18n="featuresLink">المميزات</a></li>
+        <li><a href="#features" data-i18n="securityLink">الحماية والترقية</a></li>
+        <li><a href="/dashboard/" data-i18n="serversLink">سيرفراتي</a></li>
+        <li><a href="https://discord.gg/m8c2mUEMj" target="_blank" rel="noopener" data-i18n="supportLink">الدعم الفني</a></li>
+      </ul>
+
+      <!-- Zone 3: Primary actions -->
+      <div class="action-zone">
+        <button id="langToggleBtn">🌐 EN</button>
+        <a id="loginBtn" href="/auth/discord" class="btn btn-secondary" data-i18n="loginBtn">دخول اللوحة</a>
+        <a id="inviteBtn" href="#" class="btn btn-primary" data-i18n="inviteBtn">إضافة البوت</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ================= Hero Section ================= -->
+  <section class="hero">
+    <div class="container hero-grid">
+      <div class="hero-content">
+        <div class="hero-kicker" data-i18n="heroKicker">لوحة تحكم ذكية بالكامل</div>
+        <h1 class="hero-title" data-i18n="heroTitle">بوت الحماية والإدارة الأكثر تكاملاً لسيرفرك</h1>
+        <p class="hero-desc" data-i18n="heroDesc">حماية ذكية ومتقدمة ضد الهجمات، نظام تذاكر متطور، فعاليات ومستويات تفاعلية، ولوحة تحكم عربية فائقة السرعة لتخصيص كل تفصيلة بلمسة واحدة.</p>
+        <div class="hero-actions">
+          <a id="heroInviteBtn" href="#" class="btn btn-primary" data-i18n="heroInvite">إضافة البوت إلى سيرفرك</a>
+          <a href="#features" class="btn btn-secondary" data-i18n="heroDiscover">اكتشف المميزات</a>
+        </div>
+      </div>
+      <div class="hero-visual">
+        <div class="hero-circle-glow"></div>
+        <img class="hero-avatar" src="/assets/bot-avatar.png" alt="ZETA" />
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= Stats Bar ================= -->
+  <section class="stats-bar">
+    <div class="container stats-grid">
+      <div class="stat-item">
+        <span class="stat-val" data-i18n="statUsersVal">+150K</span>
+        <span class="stat-lbl" data-i18n="statUsersLbl">مستخدم نشط</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-val" data-i18n="statServersVal">+800</span>
+        <span class="stat-lbl" data-i18n="statServersLbl">سيرفر محمي</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-val" data-i18n="statUptimeVal">99.9%</span>
+        <span class="stat-lbl" data-i18n="statUptimeLbl">نسبة جهوزية البوت</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-val" data-i18n="statSpeedVal">&lt;20ms</span>
+        <span class="stat-lbl" data-i18n="statSpeedLbl">سرعة الاستجابة</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= Features Section ================= -->
+  <section id="features" class="features">
+    <div class="container">
+      <div class="section-head">
+        <h2 class="section-title" data-i18n="sectionTitle">أنظمة متكاملة تدعم نمو مجتمعك</h2>
+        <p class="section-desc" data-i18n="sectionDesc">نوفر لك كل ما تحتاجه لإدارة سيرفر ديسكورد احترافي دون الحاجة للعديد من البوتات المشتتة.</p>
+      </div>
+
+      <div class="features-grid">
+        <!-- Feature 1: Anti-Raid -->
+        <article class="feature-card">
+          <div class="feature-icon-box">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            </svg>
+          </div>
+          <h3 class="feature-title" data-i18n="feat1Title">حماية ذكية متطورة (Anti-Raid)</h3>
+          <p class="feature-desc" data-i18n="feat1Desc">تصفية تلقائية للسبام والروابط، نظام حظر مجهولين، وتصدي شامل للحسابات الوهمية والهجمات المنظمة.</p>
+        </article>
+
+        <!-- Feature 2: Advanced Tickets -->
+        <article class="feature-card">
+          <div class="feature-icon-box">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M15 5v2"/>
+              <path d="M15 11v2"/>
+              <path d="M15 17v2"/>
+              <path d="M5 5h14a2 2 0 0 1 2 2v3a2 2 0 1 0 0 4v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-3a2 2 0 1 0 0-4V7a2 2 0 0 1 2-2z"/>
+            </svg>
+          </div>
+          <h3 class="feature-title" data-i18n="feat2Title">نظام التذاكر المتقدم</h3>
+          <p class="feature-desc" data-i18n="feat2Desc">بانلات مخصصة بأزرار تفاعلية، تصنيفات للشكاوى والمبيعات، وأرشفة تلقائية للترانسكريبت بأعلى جودة.</p>
+        </article>
+
+        <!-- Feature 3: Economy & System -->
+        <article class="feature-card">
+          <div class="feature-icon-box">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="12" y1="1" x2="12" y2="23"/>
+              <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+            </svg>
+          </div>
+          <h3 class="feature-title" data-i18n="feat3Title">نظام الاقتصاد والتفاعل</h3>
+          <p class="feature-desc" data-i18n="feat3Desc">عملة خاصة بالسيرفر، تفعيل متجر للمكافآت، تحويلات مالية آمنة، وألعاب تفاعلية لزيادة نشاط الأعضاء.</p>
+        </article>
+
+        <!-- Feature 4: Custom Embeds -->
+        <article class="feature-card">
+          <div class="feature-icon-box">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+              <circle cx="8.5" cy="8.5" r="1.5"/>
+              <polyline points="21 15 16 10 5 21"/>
+            </svg>
+          </div>
+          <h3 class="feature-title" data-i18n="feat4Title">منشئ رسائل الإيمبد المدمج</h3>
+          <p class="feature-desc" data-i18n="feat4Desc">صمم رسائل ديسكورد تفاعلية وغنية بالصور، الحقول، الأزرار التفاعلية والقوائم بضغطة زر وبمعاينة حية.</p>
+        </article>
+
+        <!-- Feature 5: Auto roles & levels -->
+        <article class="feature-card">
+          <div class="feature-icon-box">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+            </svg>
+          </div>
+          <h3 class="feature-title" data-i18n="feat5Title">نظام المستويات والـ XP</h3>
+          <p class="feature-desc" data-i18n="feat5Desc">نظام تفاعل متكامل يمنح الأعضاء نقاط خبرة تلقائية ومستويات ورتب مخصصة تلقائياً تزيد من حماس مجتمعك.</p>
+        </article>
+
+        <!-- Feature 6: welcome and logs -->
+        <article class="feature-card">
+          <div class="feature-icon-box">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+              <circle cx="9" cy="7" r="4"/>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+          </div>
+          <h3 class="feature-title" data-i18n="feat6Title">الترحيب المتطور والأوتومود</h3>
+          <p class="feature-desc" data-i18n="feat6Desc">رسائل ترحيب مخصصة بالصور ومعلومات العضو، مع لوج تدقيق فوري ومسجل لمتابعة التغييرات بالسيرفر بدقة.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= Footer ================= -->
+  <footer>
+    <div class="container footer-flex">
+      <div class="footer-brand">
+        <img src="/dashboard/images/logo.png" alt="ZETA" style="width:28px; height:28px; border-radius:6px;" />
+        <span>ZETA Bot &copy; 2026</span>
+      </div>
+      <div class="footer-copy" data-i18n="footerText">
+        تم التطوير بكل حب وموثوقية بواسطة فريق ZETA. جميع الحقوق محفوظة.
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    const translations = {
+      ar: {
+        featuresLink: "المميزات",
+        securityLink: "الحماية والترقية",
+        serversLink: "سيرفراتي",
+        supportLink: "الدعم الفني",
+        loginBtn: "دخول اللوحة",
+        inviteBtn: "إضافة البوت",
+        heroKicker: "لوحة تحكم ذكية بالكامل",
+        heroTitle: "بوت الحماية والإدارة الأكثر تكاملاً لسيرفرك",
+        heroDesc: "حماية ذكية ومتقدمة ضد الهجمات، نظام تذاكر متطور، فعاليات ومستويات تفاعلية، ولوحة تحكم عربية فائقة السرعة لتخصيص كل تفصيلة بلمسة واحدة.",
+        heroInvite: "إضافة البوت إلى سيرفرك",
+        heroDiscover: "اكتشف المميزات",
+        statUsersVal: "+150K",
+        statUsersLbl: "مستخدم نشط",
+        statServersVal: "+800",
+        statServersLbl: "سيرفر محمي",
+        statUptimeVal: "99.9%",
+        statUptimeLbl: "نسبة جهوزية البوت",
+        statSpeedVal: "<20ms",
+        statSpeedLbl: "سرعة الاستجابة",
+        sectionTitle: "أنظمة متكاملة تدعم نمو مجتمعك",
+        sectionDesc: "نوفر لك كل ما تحتاجه لإدارة سيرفر ديسكورد احترافي دون الحاجة للعديد من البوتات المشتتة.",
+        feat1Title: "حماية ذكية متطورة (Anti-Raid)",
+        feat1Desc: "تصفية تلقائية للسبام والروابط، نظام حظر مجهولين، وتصدي شامل للحسابات الوهمية والهجمات المنظمة.",
+        feat2Title: "نظام التذاكر المتقدم",
+        feat2Desc: "بانلات مخصصة بأزرار تفاعلية، تصنيفات للشكاوى والمبيعات، وأرشفة تلقائية للترانسكريبت بأعلى جودة.",
+        feat3Title: "نظام الاقتصاد والتفاعل",
+        feat3Desc: "عملة خاصة بالسيرفر، تفعيل متجر للمكافآت، تحويلات مالية آمنة، وألعاب تفاعلية لزيادة نشاط الأعضاء.",
+        feat4Title: "منشئ رسائل الإيمبد المدمج",
+        feat4Desc: "صمم رسائل ديسكورد تفاعلية وغنية بالصور، الحقول، الأزرار التفاعلية والقوائم بضغطة زر وبمعاينة حية.",
+        feat5Title: "نظام المستويات والـ XP",
+        feat5Desc: "نظام تفاعل متكامل يمنح الأعضاء نقاط خبرة تلقائية ومستويات ورتب مخصصة تلقائياً تزيد من حماس مجتمعك.",
+        feat6Title: "الترحيب المتطور والأوتومود",
+        feat6Desc: "رسائل ترحيب مخصصة بالصور ومعلومات العضو، مع لوج تدقيق فوري ومسجل لمتابعة التغييرات بالسيرفر بدقة.",
+        footerText: "تم التطوير بكل حب وموثوقية بواسطة فريق ZETA. جميع الحقوق محفوظة."
+      },
+      en: {
+        featuresLink: "Features",
+        securityLink: "Security & Upgrades",
+        serversLink: "My Servers",
+        supportLink: "Technical Support",
+        loginBtn: "Dashboard",
+        inviteBtn: "Add Bot",
+        heroKicker: "Fully Automated Control Center",
+        heroTitle: "The Most Complete Security & Management Bot",
+        heroDesc: "Advanced smart protection against raids, modular interactive tickets, engaging economies and level ups, and a blazing fast control panel to customize every detail in one tap.",
+        heroInvite: "Add Bot to Server",
+        heroDiscover: "Discover Features",
+        statUsersVal: "+150K",
+        statUsersLbl: "Active Users",
+        statServersVal: "+800",
+        statServersLbl: "Protected Guilds",
+        statUptimeVal: "99.9%",
+        statUptimeLbl: "Bot Uptime Guarantee",
+        statSpeedVal: "<20ms",
+        statSpeedLbl: "Response Speed",
+        sectionTitle: "All-in-One Systems to Empower Your Server",
+        sectionDesc: "We provide everything you need to run a professional Discord server without multiple bloated bots.",
+        feat1Title: "Smart Anti-Raid Protection",
+        feat1Desc: "Automatic anti-spam filtering, ghost ban systems, and total containment against self-bots and coordinated raids.",
+        feat2Title: "Advanced Tickets System",
+        feat2Desc: "Interactive custom buttons, flexible support categorization, and high-fidelity archival transcribing.",
+        feat3Title: "Economy & Interactions",
+        feat3Desc: "Zeta custom currency, custom reward shops, secure peer-to-peer transfers, and highly engaging mini-games.",
+        feat4Title: "Rich Embeds Builder",
+        feat4Desc: "Design beautiful styled Discord embeds, buttons, forms and drop-downs with a responsive live web preview.",
+        feat5Title: "Levels & XP Progression",
+        feat5Desc: "Gain XP for active messaging, achieve new ranks, and automate server role promotions dynamically.",
+        feat6Title: "Welcome Panels & Logging",
+        feat6Desc: "Custom welcome cards with image generator, plus comprehensive server audit logs tracking all actions.",
+        footerText: "Developed with love and reliability by the ZETA Team. All rights reserved."
+      }
+    };
+
+    function setLanguage(lang) {
+      localStorage.setItem('lang', lang);
+      document.documentElement.lang = lang;
+      document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+      
+      const btn = document.getElementById('langToggleBtn');
+      if (btn) btn.textContent = lang === 'ar' ? '🌐 EN' : '🌐 AR';
+      
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (translations[lang] && translations[lang][key]) {
+          el.textContent = translations[lang][key];
+        }
+      });
+    }
+
+    // Language Toggle Listener
+    document.getElementById('langToggleBtn').onclick = () => {
+      const current = localStorage.getItem('lang') || 'ar';
+      const next = current === 'ar' ? 'en' : 'ar';
+      setLanguage(next);
+    };
+
+    // Load saved lang on startup
+    const savedLang = localStorage.getItem('lang') || 'ar';
+    setLanguage(savedLang);
+
+    (async () => {
+      try {
+        const res = await fetch('/user/public-config');
+        const config = await res.json();
+        if (config.inviteLink) {
+          document.querySelector('#inviteBtn').href = config.inviteLink;
+          document.querySelector('#heroInviteBtn').href = config.inviteLink;
+        }
+      } catch (err) {
+        console.error('Failed to load public config:', err);
+      }
+    })();
+  </script>
+</body>
+</html>
