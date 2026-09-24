@@ -40,7 +40,8 @@
     '⏱️': 'hourglass', '⏱': 'hourglass', '⏳': 'hourglass', '⌛': 'hourglass', '📅': 'hourglass', '🎁': 'gift', '❔': 'question', '❓': 'question',
     '🤖': 'vcircle', '🔗': 'link', '✨': 'spark', '✦': 'spark', '🛒': 'card', '💳': 'card', '🎨': 'spark', '🗳️': 'like', '👁️': 'info', 'ℹ️': 'info',
     '🧩': 'gears', '💡': 'spark', '⌨️': 'game', '🔥': 'fire', '🚪': 'link', '🔒': 'lock', '🔓': 'lock', '❤️': 'heart', '💔': 'broken', '💤': 'sleep',
-    '⌘': 'tools', '⚔️': 'swords', '🚩': 'flag', '🏳️': 'flag', '🏴': 'flag', '💎': 'vcircle', '📊': 'stats', '📈': 'stats', '🎭': 'users', '📨': 'chat', '➖': 'no', '🆕': 'spark', '🔐': 'lock', '🧵': 'chat', '🐌': 'hourglass', '📢': 'speaker', '🔎': 'info', '🔇': 'sleep', '🙂': 'party', '📎': 'link', '🖼️': 'document', '💼': 'card', '🕹️': 'game', '⚔': 'swords'
+    '⌘': 'tools', '⚔️': 'swords', '🚩': 'flag', '🏳️': 'flag', '🏴': 'flag', '💎': 'vcircle', '📊': 'stats', '📈': 'stats', '🎭': 'users', '📨': 'chat', '➖': 'no', '🆕': 'spark', '🔐': 'lock', '🧵': 'chat', '🐌': 'hourglass', '📢': 'speaker', '🔎': 'info', '🔇': 'sleep', '🙂': 'party', '📎': 'link', '🖼️': 'document', '💼': 'card', '🕹️': 'game', '⚔': 'swords',
+    '🫠': 'sleep', '🫡': 'users', '🫣': 'info', '🫶': 'heart', '🫵': 'adduser', '🥹': 'party', '🤝': 'users', '🫨': 'warn', '🫷': 'no', '🫸': 'yes', '🫚': 'tools', '🪮': 'tools', '🪰': 'bug'
   };
   const EMOJI_RE = new RegExp(Object.keys(EMOJI_IMG).sort((a, b) => b.length - a.length).map((k) => k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|'), 'g');
   const SKIP_SEL = 'script,style,textarea,option,select,input,title,code,pre,svg,[contenteditable],[data-no-icon],.embed-preview,.embed-preview *,.no-iconify';

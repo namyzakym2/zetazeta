@@ -3,6 +3,7 @@ const giveawaySystem = require('../systems/giveaways');
 const voteReminder = require('../systems/voteReminder');
 const autoRoleRules = require('../systems/autoRoleRules');
 const tempBanSystem = require('../systems/tempBanSystem');
+const ticketService = require('../services/ticketService');
 const { getOrCreateMuteRole } = require('../commands/moderation/mute');
 const { deployGlobalCommands } = require('../utils/deployCommands');
 const { updatePresence } = require('../utils/presence');
@@ -93,6 +94,12 @@ module.exports = {
     await tempBanSystem.checkExpired(client).catch((err) => console.error('Temp ban check failed:', err));
     setInterval(() => {
       tempBanSystem.checkExpired(client).catch((err) => console.error('Temp ban check failed:', err));
+    }, 60_000);
+
+    // Every minute, auto-close inactive tickets
+    await ticketService.checkAutoClose(client).catch((err) => console.error('Ticket auto close failed:', err));
+    setInterval(() => {
+      ticketService.checkAutoClose(client).catch((err) => console.error('Ticket auto close failed:', err));
     }, 60_000);
   }
 };

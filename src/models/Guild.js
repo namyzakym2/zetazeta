@@ -92,7 +92,11 @@ const TicketSettingsSchema = new Schema(
     ratingEnabled: { type: Boolean, default: true },
     ratingChannelId: { type: String, default: '' },
     // يطلب من صاحب التذكرة كتابة ملاحظة نصية بعد اختيار عدد النجوم (مودال).
-    ratingRequireComment: { type: Boolean, default: false }
+    ratingRequireComment: { type: Boolean, default: false },
+    // تخصيص رسالة الترحيب والتحكم بالقفل التلقائي للتذاكر
+    ticketWelcomeTemplate: { type: String, default: '' },
+    autoCloseEnabled: { type: Boolean, default: false },
+    autoCloseMinutes: { type: Number, default: 1440 }
   },
   { _id: true }
 );
@@ -483,6 +487,7 @@ const GuildSchema = new Schema(
     guildId: { type: String, required: true, unique: true, index: true },
 
     locale: { type: String, default: 'ar' },
+    isPremium: { type: Boolean, default: false },
     // Empty string ('') means shortcuts trigger with NO prefix at all — just typing
     // the shortcut word itself (e.g. "c" or "رصيدي") runs the command. This is the
     // default now; set it back to "!" (or any string) via /system prefix if preferred.

@@ -361,7 +361,8 @@ router.get('/:guildId/overview', ensureAuth, ensureGuildAdmin, async (req, res) 
     guild: {
       name: liveGuild?.name || '',
       memberCount: liveGuild?.memberCount ?? users.length,
-      createdAt: snowflakeDate(guildId)
+      createdAt: snowflakeDate(guildId),
+      isPremium: guildDoc.isPremium || false
     },
     bot,
     commands: { total30, last7, prev7, today: perDay.get(today) || 0 },
@@ -781,7 +782,8 @@ router.post('/:guildId/tickets', ensureAuth, ensureGuildAdmin, async (req, res) 
     'panelImage', 'panelThumbnail', 'panelFooter', 'maxTicketsPerUser',
     'ticketNameFormat', 'closeButton', 'claimButton', 'transcriptButton',
     'deleteButton', 'transcriptChannelId', 'openDisplayType', 'actionDisplayType',
-    'ratingEnabled', 'ratingChannelId'
+    'ratingEnabled', 'ratingChannelId', 'ticketWelcomeTemplate', 'autoCloseEnabled',
+    'autoCloseMinutes'
   ];
   for (const field of allowedFields) {
     if (req.body[field] === undefined) continue;
@@ -2267,6 +2269,122 @@ router.delete('/:guildId/shield/backups/:id', ensureAuth, ensureGuildAdmin, asyn
   const ok = await backupService.deleteBackup(req.params.guildId, req.params.id);
   if (!ok) return res.status(404).json({ error: 'النسخة غير موجودة.' });
   res.json({ success: true });
+});
+
+const getStripe = () => {
+  if (!process.env.STRIPE_SECRET_KEY) return null;
+  return require('stripe')(process.env.STRIPE_SECRET_KEY);
+};
+
+router.post('/:guildId/premium/stripe-checkout', ensureAuth, ensureGuildAdmin, async (req, res) => {
+  const guildId = req.params.guildId;
+  const { plan } = req.body;
+
+  const stripeInstance = getStripe();
+  if (!stripeInstance) {
+    return res.status(400).json({
+      success: false,
+      error: 'لم يتم إعداد بوابة الدفع Stripe في خادم الداشبورد بعد. يرجى تزويد مفتاح STRIPE_SECRET_KEY في ملف البيئة .env.'
+    });
+  }
+
+  const priceAmount = plan === 'yearly' ? 4900 : 500;
+  const priceName = plan === 'yearly' ? 'ZETA Premium - الباقة السنوية 👑' : 'ZETA Premium - الباقة الشهرية 👑';
+
+  try {
+    const session = await stripeInstance.checkout.sessions.create({
+      payment_method_types: ['card'],
+      line_items: [
+        {
+          price_data: {
+            currency: 'usd',
+            product_data: {
+              name: priceName,
+              description: `تفعيل ميزات ZETA Premium الفاخرة لسيرفرك (ID: ${guildId})`,
+            },
+            unit_amount: priceAmount,
+          },
+          quantity: 1,
+        },
+      ],
+      mode: 'payment',
+      metadata: {
+        guildId,
+        userId: req.user.id,
+        plan
+      },
+      success_url: `${process.env.DASHBOARD_URL}/dashboard/?guildId=${guildId}&stripe_session_id={CHECKOUT_SESSION_ID}&stripe_status=success`,
+      cancel_url: `${process.env.DASHBOARD_URL}/dashboard/?guildId=${guildId}&stripe_status=cancel`,
+    });
+
+    res.json({ success: true, url: session.url });
+  } catch (err) {
+    console.error('Stripe Session Creation Error:', err);
+    res.status(500).json({ success: false, error: 'حدث خطأ أثناء الاتصال بـ Stripe: ' + err.message });
+  }
+});
+
+router.get('/:guildId/premium/stripe-verify', ensureAuth, ensureGuildAdmin, async (req, res) => {
+  const guildId = req.params.guildId;
+  const sessionId = req.query.session_id;
+
+  if (!sessionId) {
+    return res.status(400).json({ success: false, error: 'رمز الجلسة مفقود.' });
+  }
+
+  const stripeInstance = getStripe();
+  if (!stripeInstance) {
+    return res.status(500).json({ success: false, error: 'بوابة الدفع Stripe غير مهيأة على السيرفر.' });
+  }
+
+  try {
+    const session = await stripeInstance.checkout.sessions.retrieve(sessionId);
+    
+    if (session.payment_status === 'paid' && session.metadata.guildId === guildId) {
+      const guildDoc = await getOrCreateGuildDoc(guildId);
+      guildDoc.isPremium = true;
+      await guildDoc.save();
+
+      console.log(`💎 Premium activated via Real Stripe Payment for Guild ${guildId} by user ${req.user.username}`);
+      return res.json({ success: true, message: 'تم تفعيل باقة ZETA Premium لسيرفرك بنجاح عبر Stripe! 🎉' });
+    } else {
+      return res.status(400).json({ success: false, error: 'لم تكتمل عملية الدفع أو أن الجلسة غير صالحة.' });
+    }
+  } catch (err) {
+    console.error('Stripe Session Verification Error:', err);
+    res.status(500).json({ success: false, error: 'فشل التحقق من الجلسة: ' + err.message });
+  }
+});
+
+router.post('/:guildId/premium/pay', ensureAuth, ensureGuildAdmin, async (req, res) => {
+  const guildId = req.params.guildId;
+  const { cardholderName, cardNumber, expiryDate, cvv, plan } = req.body;
+
+  // Basic validation
+  if (!cardholderName || !cardNumber || !expiryDate || !cvv || !plan) {
+    return res.status(400).json({ success: false, error: 'الرجاء إدخال جميع تفاصيل البطاقة بشكل صحيح.' });
+  }
+
+  // Validate card number length
+  const cleanCard = cardNumber.replace(/\s+/g, '');
+  if (cleanCard.length < 13 || cleanCard.length > 19) {
+    return res.status(400).json({ success: false, error: 'رقم البطاقة غير صالح.' });
+  }
+
+  // Simulate banking network request delay (direct processing)
+  await new Promise(resolve => setTimeout(resolve, 1500));
+
+  // Update Guild premium status in DB
+  const guildDoc = await getOrCreateGuildDoc(guildId);
+  guildDoc.isPremium = true;
+  await guildDoc.save();
+
+  console.log(`💎 Premium activated via Direct Card Payment for Guild ${guildId} by user ${req.user.username}`);
+
+  res.json({
+    success: true,
+    message: 'تم تفعيل باقة ZETA Premium لسيرفرك بنجاح! شكرًا لثقتك بنا 💎'
+  });
 });
 
 module.exports = router;

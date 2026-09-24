@@ -3,6 +3,239 @@
 const app=document.getElementById('app');
 const $=(s,r=document)=>r.querySelector(s);
 const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
+
+const DASH_LOCALES = {
+  ar: {
+    'cat.main': 'الرئيسية والمراقبة',
+    'cat.security': 'الحماية والأمان (Anti-Raid)',
+    'cat.management': 'إدارة السيرفر والتحكم',
+    'cat.tickets': 'التذاكر والدعم الفني',
+    'cat.community': 'المجتمع والتفاعل',
+    'cat.automation': 'الأتمتة والنمو',
+    'cat.staff': 'الكادر الإداري والنقاط',
+    'cat.design': 'التصميم والمظهر',
+    'nav.overview': 'نظرة عامة والنشاط',
+    'nav.automod': 'الحماية الذكية AutoMod',
+    'nav.logs': 'سجلات التدقيق Audit Logs',
+    'nav.settings': 'الإعدادات العامة',
+    'nav.commands': 'مركز الأوامر والصلاحيات',
+    'nav.tickets': 'نظام التذاكر المتقدم',
+    'nav.applications': 'تقديمات الإدارة والتوظيف',
+    'nav.welcome': 'الترحيب والمغادرة المخصص',
+    'nav.autoresponder': 'الردود التلقائية الذكية',
+    'nav.suggestions': 'صندوق الاقتراحات',
+    'nav.reports': 'بلاغات الأعضاء والمخالفات',
+    'nav.autorole': 'الرتب التلقائية Auto-Roles',
+    'nav.level': 'نظام المستويات والـ XP',
+    'nav.sellerroom': 'روم وسوق البيع',
+    'nav.staff_points': 'نقاط ومتابعة الإدارة',
+    'nav.interaction_points': 'نقاط التفاعل والمكافآت',
+    'nav.embeds': 'منشئ الرسائل Embed Builder',
+    'nav.components': 'لوحات الأزرار التفاعلية',
+    'ui.search_placeholder': 'ابحث في الإعدادات...',
+    'ui.global_search_placeholder': 'ابحث عن أي شيء...',
+    'ui.my_servers': 'سيرفراتي',
+    'ui.choose_server': 'اختر السيرفر',
+    'ui.manage_server': 'إدارة سيرفرك',
+    'ui.save': 'حفظ التغييرات',
+    'ui.add': 'إضافة',
+    'ui.delete': 'حذف',
+    'ui.cancel': 'إلغاء',
+    'ui.loading': 'جاري تحميل لوحة التحكم...',
+    'ui.success': 'تم الحفظ بنجاح ✓',
+    'ui.error': 'حدث خطأ ما',
+    'ui.premium_title': 'ZETA Premium',
+    'ui.premium_desc': 'استمتع بجميع المميزات بدون حدود',
+    'ui.premium_btn': 'ترقية الآن',
+    'overview.title': 'نظرة عامة والنشاط',
+    'overview.stats': 'الإحصائيات الحية',
+    'overview.active_now': 'نشط الآن',
+    'overview.trend': 'معدل التفاعل',
+    'tickets.title': '🎫 نظام التذاكر المتقدم',
+    'tickets.desc': 'تخصيص كامل لأزرار الدعم الفني وتصنيفاتها والمظهر العام في سيرفرك',
+    'tickets.enabled_toggle': 'تفعيل نظام التذاكر',
+    'tickets.tab_general': '⚙️ الإعدادات العامة',
+    'tickets.tab_panel': '🎨 مظهر اللوحة',
+    'tickets.tab_buttons': '🎫 تصنيفات الدعم',
+    'tickets.tab_inner': '⚡ أزرار الردود الجاهزة',
+    'tickets.tab_extra': '🧰 البانلات الإضافية',
+    'tickets.general_title': '⚙️ الإعدادات العامة للتذاكر',
+    'tickets.panel_channel': 'قناة لوحة التكت في السيرفر',
+    'tickets.default_category': 'التصنيف الافتراضي (Category)',
+    'tickets.transcript_channel': 'قناة سجل التذاكر (Transcripts)',
+    'tickets.support_role': 'رتبة الدعم الافتراضية للرد',
+    'tickets.name_format': 'صيغة اسم التذكرة عند الفتح',
+    'tickets.max_per_user': 'حد التذاكر المسموح بها للعضو',
+    'tickets.action_buttons': '🔒 أزرار وخيارات إجراءات التكت المباشرة:',
+    'tickets.close_btn': 'زر الإغلاق السريع (Close Button)',
+    'tickets.claim_btn': 'زر الاستلام الإداري (Claim Button)',
+    'tickets.transcript_btn': 'زر إرسال الأرشيف (Transcript Button)',
+    'tickets.delete_btn': 'زر حذف القناة نهائياً (Delete Button)',
+    'tickets.rating_enabled': 'تفعيل طلب تقييم الإدارة للأعضاء بعد الإغلاق',
+    'tickets.rating_channel': 'قناة إرسال تقييمات الدعم الفني',
+    'tickets.visual_title': '🎨 مظهر وتنسيق لوحة التكت في Discord',
+    'tickets.panel_title': 'عنوان لوحة فتح التكت الرئيسي',
+    'tickets.panel_color': 'لون شريط اللوحة الجانبي (Hex)',
+    'tickets.panel_image': 'رابط أو ملف صورة البانر (Banner)',
+    'tickets.panel_thumbnail': 'رابط أو ملف الصورة المصغرة (Thumbnail)',
+    'tickets.panel_footer': 'نص الفوتر بالأسفل (Footer)',
+    'tickets.display_type': 'طريقة عرض تصنيفات الدعم',
+    'tickets.display_buttons': 'أزرار تفاعلية ملونة (حتى 5 تصنيفات)',
+    'tickets.display_menu': 'قائمة اختيار منسدلة (Select Menu — حتى 25 تصنيف)',
+    'tickets.panel_desc': 'وصف اللوحة والتعليمات',
+    'tickets.categories_title': '🎫 أزرار تصنيفات التكت المتاحة',
+    'tickets.categories_desc': 'قم بإضافة أزرار أو تصنيفات مخصصة، لكل زر تصنيف وقناة ورتب دعم معينة لفرز طلبات الدعم.',
+    'tickets.btn_label': 'اسم الزر (Label)',
+    'tickets.btn_emoji': 'الإيموجي الخاص بالزر (Emoji)',
+    'tickets.btn_style': 'لون الزر في Discord',
+    'tickets.btn_category': 'تصنيف القناة عند فتح التكت (Category)',
+    'tickets.btn_support_role': 'رتبة طاقم الدعم المختصة بالرد',
+    'tickets.btn_custom_id': 'المعرف الفرعي الداخلي للزر',
+    'tickets.btn_image': 'صورة ترحيبية خاصة داخل التكت',
+    'tickets.btn_welcome_msg': 'نص رسالة الترحيب المخصصة داخل التكت',
+    'tickets.btn_add': '＋ إضافة تصنيف تكت جديد',
+    'tickets.current_buttons': 'الأزرار الحالية المضافة للوحة:',
+    'tickets.no_buttons': 'لا توجد تصنيفات مضافة بعد للوحة.',
+    'tickets.quick_title': '⚡ أزرار الردود الجاهزة والتحكم الداخلي',
+    'tickets.quick_desc': 'أزرار سريعة ومفيدة تظهر داخل روم التكت المفتوحة لإرسال ردود آلية مجهزة مسبقاً بنقرة زر.',
+    'tickets.quick_btn_add': '＋ إضافة زر جاهز للتكت',
+    'tickets.quick_current': 'الأزرار الجاهزة المتاحة الآن:',
+    'tickets.quick_no_buttons': 'لا توجد أزرار تكت جاهزة.',
+    'tickets.quick_response_text': 'نص الرد التلقائي المرسل عند ضغط الزر',
+    'tickets.extra_title': '🧰 لوحات الدعم الإضافية (Extra Panels)',
+    'tickets.extra_desc': 'إنشاء لوحات وبانلات تكت إضافية ومستقلة لتوزيعها في رومات وقنوات متعددة.',
+    'tickets.extra_new_name': 'اسم اللوحة الجديدة',
+    'tickets.extra_create': '＋ إنشاء لوحة جديدة',
+    'tickets.extra_current': 'البانلات الإضافية الحالية:',
+    'tickets.extra_no_panels': 'لا توجد بانلات تكت إضافية مضافة.',
+    'tickets.preview_title': 'support',
+    'tickets.preview_banner_text': 'معاينة مباشرة لشات Discord',
+    'tickets.welcome_template_label': 'قالب رسالة الترحيب المخصصة في التذكرة',
+    'tickets.welcome_template_placeholder': 'مثال: أهلاً بك {user} في تذكرتك لقسم {label}... يدعم الاختصارات {user} و {username} و {label} و {server}',
+    'tickets.auto_close_section': '⏳ خيارات قفل وإغلاق التذاكر التلقائي (Auto-Close):',
+    'tickets.auto_close_enabled': 'تفعيل القفل التلقائي للتكت عند عدم وجود ردود (Auto-Close Inactive)',
+    'tickets.auto_close_minutes': 'مدة الخمول قبل القفل التلقائي (بالدقائق)',
+    'tickets.auto_close_placeholder': 'مثال: 1440 لـ 24 ساعة خمول، 60 لساعة واحدة'
+  },
+  en: {
+    'cat.main': 'Main & Monitoring',
+    'cat.security': 'Security & Anti-Raid',
+    'cat.management': 'Server Management',
+    'cat.tickets': 'Tickets & Tech Support',
+    'cat.community': 'Community & Interaction',
+    'cat.automation': 'Automation & Growth',
+    'cat.staff': 'Staff & Points System',
+    'cat.design': 'Design & Appearance',
+    'nav.overview': 'Overview & Activity',
+    'nav.automod': 'Smart AutoMod',
+    'nav.logs': 'Audit Logs',
+    'nav.settings': 'General Settings',
+    'nav.commands': 'Command Center',
+    'nav.tickets': 'Advanced Tickets',
+    'nav.applications': 'Staff Applications',
+    'nav.welcome': 'Welcome & Leave',
+    'nav.autoresponder': 'Smart AutoResponder',
+    'nav.suggestions': 'Suggestions Box',
+    'nav.reports': 'Member Reports',
+    'nav.autorole': 'Auto-Roles',
+    'nav.level': 'Levels & XP System',
+    'nav.sellerroom': 'Seller Room & Marketplace',
+    'nav.staff_points': 'Staff Tracking Points',
+    'nav.interaction_points': 'Interaction Points',
+    'nav.embeds': 'Embed Builder',
+    'nav.components': 'Interactive Button Panels',
+    'ui.search_placeholder': 'Search settings...',
+    'ui.global_search_placeholder': 'Search anything...',
+    'ui.my_servers': 'My Servers',
+    'ui.choose_server': 'Select Server',
+    'ui.manage_server': 'Manage Server',
+    'ui.save': 'Save Changes',
+    'ui.add': 'Add',
+    'ui.delete': 'Delete',
+    'ui.cancel': 'Cancel',
+    'ui.loading': 'Loading dashboard...',
+    'ui.success': 'Saved successfully ✓',
+    'ui.error': 'Something went wrong',
+    'ui.premium_title': 'ZETA Premium',
+    'ui.premium_desc': 'Enjoy all features with no limits',
+    'ui.premium_btn': 'Upgrade Now',
+    'overview.title': 'Overview & Activity',
+    'overview.stats': 'Live Stats',
+    'overview.active_now': 'Active Now',
+    'overview.trend': 'Interaction Trend',
+    'tickets.title': '🎫 Advanced Ticket System',
+    'tickets.desc': 'Customize your support buttons, categories, and Discord visual panels.',
+    'tickets.enabled_toggle': 'Enable Ticket System',
+    'tickets.tab_general': '⚙️ General Settings',
+    'tickets.tab_panel': '🎨 Panel Design',
+    'tickets.tab_buttons': '🎫 Support Departments',
+    'tickets.tab_inner': '⚡ Quick Action Buttons',
+    'tickets.tab_extra': '🧰 Extra Panels',
+    'tickets.general_title': '⚙️ General Ticket Settings',
+    'tickets.panel_channel': 'Ticket Panel Channel',
+    'tickets.default_category': 'Default Category',
+    'tickets.transcript_channel': 'Transcript Channel',
+    'tickets.support_role': 'Default Support Role',
+    'tickets.name_format': 'Ticket Name Format',
+    'tickets.max_per_user': 'Max Tickets Per User',
+    'tickets.action_buttons': '🔒 Direct Ticket Action Buttons:',
+    'tickets.close_btn': 'Close Button',
+    'tickets.claim_btn': 'Claim Button',
+    'tickets.transcript_btn': 'Transcript Button',
+    'tickets.delete_btn': 'Delete Button',
+    'tickets.rating_enabled': 'Enable Post-Close Staff Rating',
+    'tickets.rating_channel': 'Staff Ratings Channel',
+    'tickets.visual_title': '🎨 Ticket Panel Visuals in Discord',
+    'tickets.panel_title': 'Main Panel Title',
+    'tickets.panel_color': 'Sidebar Accent Color (Hex)',
+    'tickets.panel_image': 'Banner Image URL',
+    'tickets.panel_thumbnail': 'Thumbnail Image URL',
+    'tickets.panel_footer': 'Footer Text',
+    'tickets.display_type': 'Department Selector Style',
+    'tickets.display_buttons': 'Interactive Colored Buttons (Max 5)',
+    'tickets.display_menu': 'Dropdown Select Menu (Max 25)',
+    'tickets.panel_desc': 'Panel Description & Instructions',
+    'tickets.categories_title': '🎫 Support Departments & Buttons',
+    'tickets.categories_desc': 'Add custom ticket buttons. Each button directs users to a specific channel category, welcome message, and support team.',
+    'tickets.btn_label': 'Button Label',
+    'tickets.btn_emoji': 'Button Emoji',
+    'tickets.btn_style': 'Discord Button Style',
+    'tickets.btn_category': 'Target Category',
+    'tickets.btn_support_role': 'Target Support Role',
+    'tickets.btn_custom_id': 'Internal Button ID',
+    'tickets.btn_image': 'Custom Ticket Welcome Image',
+    'tickets.btn_welcome_msg': 'Custom Ticket Welcome Message',
+    'tickets.btn_add': '＋ Add Support Department',
+    'tickets.current_buttons': 'Current Support Departments:',
+    'tickets.no_buttons': 'No support departments configured yet.',
+    'tickets.quick_title': '⚡ Quick Ticket Response Buttons',
+    'tickets.quick_desc': 'Add quick-response buttons inside open tickets to send template replies with a single click.',
+    'tickets.quick_btn_add': '＋ Add Quick Response Button',
+    'tickets.quick_current': 'Available Quick Response Buttons:',
+    'tickets.quick_no_buttons': 'No quick response buttons configured yet.',
+    'tickets.quick_response_text': 'Template Response Content',
+    'tickets.extra_title': '🧰 Extra Independent Panels',
+    'tickets.extra_desc': 'Create independent ticket panels to distribute across different server channels.',
+    'tickets.extra_new_name': 'New Panel Name',
+    'tickets.extra_create': '＋ Create New Panel',
+    'tickets.extra_current': 'Current Independent Panels:',
+    'tickets.extra_no_panels': 'No independent panels configured yet.',
+    'tickets.preview_title': 'support',
+    'tickets.preview_banner_text': 'Live Discord Chat Preview',
+    'tickets.welcome_template_label': 'Custom Ticket Welcome Message Template',
+    'tickets.welcome_template_placeholder': 'E.g., Welcome {user} to {label} support... supports placeholders {user}, {username}, {label}, and {server}',
+    'tickets.auto_close_section': '⏳ Ticket Auto-Close Options:',
+    'tickets.auto_close_enabled': 'Enable Auto-Close for inactive tickets (Auto-Close Inactive)',
+    'tickets.auto_close_minutes': 'Inactivity Duration Before Close (Minutes)',
+    'tickets.auto_close_placeholder': 'E.g., 1440 for 24 hours of inactivity, 60 for 1 hour'
+  }
+};
+
+function tDash(key) {
+  const lang = localStorage.getItem('zeta_dash_lang') || 'ar';
+  return DASH_LOCALES[lang]?.[key] || DASH_LOCALES['ar']?.[key] || key;
+}
+
 let state={guild:null,servers:[],me:null,cache:{}};
 
 async function api(url,opt={}){
@@ -110,51 +343,131 @@ function formDataObj(form){
 }
 
 async function boot(){
+  window.state = state;
   try{
     state.me=await api('/user/me');
     const s=await api('/user/servers'); state.servers=s.servers||[]; state.clientId=s.clientId||'';
     renderShell(); renderServerPicker(); 
-    const q=new URLSearchParams(location.search).get('guildId');
+    const params = new URLSearchParams(location.search);
+    const q = params.get('guildId');
+    const stripeSessionId = params.get('stripe_session_id');
+    const stripeStatus = params.get('stripe_status');
+
+    if (stripeSessionId && stripeStatus === 'success' && q) {
+      toast('جاري التحقق من عملية الدفع لدى Stripe...');
+      try {
+        const res = await api(`/admin/${q}/premium/stripe-verify?session_id=${stripeSessionId}`);
+        toast(res.message || 'تم تفعيل Premium بنجاح! 💎');
+        const matched = state.servers.find(s => s.id === q);
+        if (matched) matched.isPremium = true;
+        const cleanUrl = location.pathname + `?guildId=${q}`;
+        history.replaceState({}, '', cleanUrl);
+      } catch (err) {
+        toast(err.message, true);
+      }
+    } else if (stripeStatus === 'cancel') {
+      toast('تم إلغاء عملية الدفع من Stripe.', true);
+      const cleanUrl = location.pathname + (q ? `?guildId=${q}` : '');
+      history.replaceState({}, '', cleanUrl);
+    }
+
     const first=state.servers.find(x=>x.installed&&x.id===q)||state.servers.find(x=>x.installed);
     if(first) selectGuild(first.id); else showNoGuild();
   }catch(e){app.innerHTML=card('تعذر فتح لوحة التحكم',`<p class="v-error">${esc(e.message)}</p><a class="v-btn primary" href="/auth/discord">تسجيل الدخول مجددًا</a>`);}
 }
 function renderShell(){
-  if(state.me){$('#topbarUserName').textContent=state.me.username||'المستخدم';$('#topbarAvatarImg').src=state.me.avatar||'';}
+  const lang = localStorage.getItem('zeta_dash_lang') || 'ar';
+  document.documentElement.lang = lang;
+  document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+
+  if(state.me){
+    $('#topbarUserName').textContent=state.me.username || (lang === 'ar' ? 'المستخدم' : 'User');
+    $('#topbarAvatarImg').src=state.me.avatar||'';
+  }
+
+  // Translate search box placeholders
+  const globalSearchInput = $('#globalSearch .vx-search-ph');
+  if (globalSearchInput) globalSearchInput.textContent = tDash('ui.global_search_placeholder');
+  const navSearchInput = $('#navSearch');
+  if (navSearchInput) navSearchInput.placeholder = tDash('ui.search_placeholder');
+  
+  // Translate back buttons
+  const backBtn = $('.vx-back');
+  if (backBtn) backBtn.innerHTML = `<span data-icon="arrowLeft"></span> ${tDash('ui.my_servers')}`;
+
+  const premiumMini = $('.vx-premium-mini');
+  if (premiumMini) {
+    premiumMini.innerHTML = `
+      <img class="vx-ico vx-ico-lg" src="/dashboard/images/icons/v.png" alt="" />
+      <b>${tDash('ui.premium_title')}</b>
+      <small>${tDash('ui.premium_desc')}</small>
+      <button class="vx-btn vx-btn-primary vx-btn-block" type="button" data-vx-soon>${tDash('ui.premium_btn')}</button>
+    `;
+  }
+
+  // Inject dynamic language toggle in top bar
+  let langToggle = $('#dashLangToggle');
+  if(!langToggle){
+    langToggle = document.createElement('button');
+    langToggle.id = 'dashLangToggle';
+    langToggle.type = 'button';
+    langToggle.className = 'vx-icon-btn';
+    langToggle.style.marginInlineEnd = '12px';
+    langToggle.style.fontSize = '12px';
+    langToggle.style.fontWeight = 'bold';
+    langToggle.style.padding = '4px 10px';
+    langToggle.style.borderRadius = '8px';
+    langToggle.style.background = 'rgba(255,255,255,0.05)';
+    langToggle.style.border = '1px solid rgba(255,255,255,0.1)';
+    langToggle.style.color = 'var(--text-bright, #fff)';
+    langToggle.style.cursor = 'pointer';
+    
+    const bellWrap = $('.vx-bell-wrap');
+    if(bellWrap) {
+      bellWrap.parentNode.insertBefore(langToggle, bellWrap);
+    }
+  }
+  langToggle.textContent = lang === 'ar' ? 'English' : 'العربية';
+  langToggle.onclick = () => {
+    const nextLang = lang === 'ar' ? 'en' : 'ar';
+    localStorage.setItem('zeta_dash_lang', nextLang);
+    location.reload();
+  };
+
   const cats=[
-    ['الرئيسية والمراقبة', [
-      ['overview','نظرة عامة والنشاط','⌂','vhex','الرئيسية والإحصائيات الحية']
+    [tDash('cat.main'), [
+      ['overview', tDash('nav.overview'),'⌂','vhex', lang === 'ar' ? 'الرئيسية والإحصائيات الحية' : 'Main & Live Statistics']
     ]],
-    ['الحماية والأمان (Anti-Raid)', [
-      ['automod','الحماية الذكية AutoMod','🛡','ban','تصفية الروابط والسبام والكلمات'],
-      ['logs','سجلات التدقيق Audit Logs','◉','info','سجلات متقدمة لكافة الأحداث']
+    [tDash('cat.security'), [
+      ['automod', tDash('nav.automod'),'🛡','ban', lang === 'ar' ? 'تصفية الروابط والسبام والكلمات' : 'Links, Spam, and Word filters'],
+      ['logs', tDash('nav.logs'),'◉','info', lang === 'ar' ? 'سجلات متقدمة لكافة الأحداث' : 'Advanced logs for all events']
     ]],
-    ['إدارة السيرفر والتحكم', [
-      ['settings','الإعدادات العامة','⚙','gear','البريفكس واللغة والرتبة الأساسية'],
-      ['command-center','مركز الأوامر والصلاحيات','⌘','tools','تفعيل وتعطيل صلاحيات الأوامر']
+    [tDash('cat.management'), [
+      ['settings', tDash('nav.settings'),'⚙','gear', lang === 'ar' ? 'البريفكس واللغة والرتبة الأساسية' : 'Prefix, Language, and Auto-Role'],
+      ['command-center', tDash('nav.commands'),'⌘','tools', lang === 'ar' ? 'تفعيل وتعطيل صلاحيات الأوامر' : 'Enable & disable command permissions']
     ]],
-    ['التذاكر والدعم الفني', [
-      ['tickets','نظام التذاكر المتقدم','🎫','ticket','بانلات وأزرار الدعم المخصصة'],
-      ['applications','تقديمات الإدارة والتوظيف','📝','moderation','نماذج واستمارات القبول']
+    [tDash('cat.tickets'), [
+      ['tickets', tDash('nav.tickets'),'🎫','ticket', lang === 'ar' ? 'بانلات وأزرار الدعم المخصصة' : 'Custom support buttons & panels'],
+      ['applications', tDash('nav.applications'),'📝','moderation', lang === 'ar' ? 'نماذج واستمارات القبول' : 'Application and admission forms']
     ]],
-    ['المجتمع والتفاعل', [
-      ['welcomejoin','الترحيب والمغادرة المخصص','👋','adduser','رسائل ترحيب، صور، وإحصاء أعضاء'],
-      ['autoresponder','الردود التلقائية الذكية','↪','chat','ردود آلية سريعة بالكلمات'],
-      ['suggestions','صندوق الاقتراحات','💡','like','نظام التصويت والآراء'],
-      ['reports','بلاغات الأعضاء والمخالفات','⚠','flag','استقبال ومتابعة شكاوى السيرفر']
+    [tDash('cat.community'), [
+      ['welcomejoin', tDash('nav.welcome'),'👋','adduser', lang === 'ar' ? 'رسائل ترحيب، صور، وإحصاء أعضاء' : 'Welcome messages, images, and counts'],
+      ['autoresponder', tDash('nav.autoresponder'),'↪','chat', lang === 'ar' ? 'ردود آلية سريعة بالكلمات' : 'Quick automatic text replies'],
+      ['suggestions', tDash('nav.suggestions'),'💡','like', lang === 'ar' ? 'نظام التصويت والآراء' : 'Voting & suggestions box'],
+      ['reports', tDash('nav.reports'),'⚠️','flag', lang === 'ar' ? 'استقبال ومتابعة شكاوى السيرفر' : 'Receive & follow up on server reports']
     ]],
-    ['الأتمتة والنمو', [
-      ['autorole','الرتب التلقائية Auto-Roles','♟','users','إعطاء الرتب للأعضاء والبوتات'],
-      ['level','نظام المستويات والـ XP','★','star','مكافآت التفاعل والترقيات'],
-      ['sellerroom','روم وسوق البيع','💰','card','منظومة التجارة والبيع الموثوق']
+    [tDash('cat.automation'), [
+      ['autorole', tDash('nav.autorole'),'♟','users', lang === 'ar' ? 'إعطاء الرتب للأعضاء والبوتات' : 'Assign roles to members and bots'],
+      ['level', tDash('nav.level'),'★','star', lang === 'ar' ? 'مكافآت التفاعل والترقيات' : 'Interaction rewards & levels'],
+      ['sellerroom', tDash('nav.sellerroom'),'💰','card', lang === 'ar' ? 'منظومة التجارة والبيع الموثوق' : 'Secure commerce & sales room']
     ]],
-    ['الكادر الإداري والنقاط', [
-      ['staff-points','نقاط ومتابعة الإدارة','✦','crown','تقييم وتنافس طاقم الإشراف'],
-      ['interaction-points','نقاط التفاعل والمكافآت','✧','bolt','نقاط الرسائل والتفاعل العام']
+    [tDash('cat.staff'), [
+      ['staff-points', tDash('nav.staff_points'),'✦','crown', lang === 'ar' ? 'نقاط ومتابعة الإدارة' : 'Staff scoring & activity tracking'],
+      ['interaction-points', tDash('nav.interaction_points'),'✧','bolt', lang === 'ar' ? 'نقاط الرسائل والتفاعل العام' : 'Message points & community interaction']
     ]],
-    ['التصميم والمظهر', [
-      ['embeds','منشئ الرسائل Embed Builder','▣','document','تصميم رسائل إيمبد غنية واحترافية'],
-      ['components','لوحات الأزرار التفاعلية','☷','channels','أزرار وقوائم ديسكورد التفاعلية']
+    [tDash('cat.design'), [
+      ['embeds', tDash('nav.embeds'),'▣','document', lang === 'ar' ? 'تصميم رسائل إيمبد غنية واحترافية' : 'Build rich & beautiful embeds'],
+      ['components', tDash('nav.components'),'☷','channels', lang === 'ar' ? 'أزرار وقوائم ديسكورد التفاعلية' : 'Interactive Discord components']
     ]]
   ];
   const nav=$('#categoryNav');
@@ -205,12 +518,12 @@ function renderShell(){
   });
 }
 function renderServerPicker(){
-  const menu=$('#serverPickerMenu');menu.innerHTML=state.servers.map(g=>`<button class="v-server-option" data-id="${g.id}" style="display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 12px; transition: background 0.15s; border-radius: 10px; background: transparent; border: 0; cursor: pointer; text-align: start; color: inherit;"><img src="${esc(g.icon||'/dashboard/images/logo.png')}" style="width: 36px; height: 36px; border-radius: 9px; flex-shrink: 0;"><div style="flex: 1; display: flex; flex-direction: column; align-items: flex-start; text-align: right; min-width: 0;"><span style="font-size: 13px; font-weight: 700; color: var(--text, #fff); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; width: 100%; display: block; text-align: right;">${esc(g.name)}</span><div style="display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--muted, #9cb2a6); margin-top: 2px;">${g.memberCount != null ? `<span>👥 ${g.memberCount.toLocaleString()}</span>` : ''}${g.activeChannelCount != null ? `<span>· 💬 ${g.activeChannelCount} قنوات</span>` : ''}</div></div><em style="font-size: 11px; font-weight: 600; color: ${g.installed ? 'var(--green-bright, #34d399)' : 'var(--muted, #9cb2a6)'}; font-style: normal; flex-shrink: 0; margin-inline-start: auto;">${g.installed ? 'متصل' : 'غير مضاف'}</em></button>`).join('');
+  const menu=$('#serverPickerMenu');menu.innerHTML=state.servers.map(g=>`<button class="v-server-option" data-id="${g.id}" style="display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 12px; transition: background 0.15s; border-radius: 10px; background: transparent; border: 0; cursor: pointer; text-align: start; color: inherit;"><img src="${esc(g.icon||'/dashboard/images/logo.png')}" style="width: 36px; height: 36px; border-radius: 9px; flex-shrink: 0;"><div style="flex: 1; display: flex; flex-direction: column; align-items: flex-start; text-align: right; min-width: 0;"><span style="font-size: 13px; font-weight: 700; color: var(--text, #fff); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; width: 100%; display: flex; justify-content: flex-end; align-items: center; gap: 4px; text-align: right;">${g.isPremium ? '<span style="color: #f59e0b;" title="ZETA Premium">👑</span>' : ''} ${esc(g.name)}</span><div style="display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--muted, #9cb2a6); margin-top: 2px;">${g.memberCount != null ? `<span>👥 ${g.memberCount.toLocaleString()}</span>` : ''}${g.activeChannelCount != null ? `<span>· 💬 ${g.activeChannelCount} قنوات</span>` : ''}</div></div><em style="font-size: 11px; font-weight: 600; color: ${g.isPremium ? '#f59e0b' : (g.installed ? 'var(--green-bright, #34d399)' : 'var(--muted, #9cb2a6)')}; font-style: normal; flex-shrink: 0; margin-inline-start: auto;">${g.isPremium ? 'Premium 💎' : (g.installed ? 'متصل' : 'غير مضاف')}</em></button>`).join('');
   $('#serverPickerBtn').onclick=()=>$('#serverPicker').classList.toggle('open');
   menu.onclick=e=>{const b=e.target.closest('[data-id]');if(b){const g=state.servers.find(x=>x.id===b.dataset.id);if(g.installed)selectGuild(g.id);else invite(g.id)}};
 }
 function invite(id){const s=state.servers.find(x=>x.id===id);const url=`https://discord.com/oauth2/authorize?client_id=${encodeURIComponent(state.clientId)}&scope=bot%20applications.commands&permissions=8&guild_id=${encodeURIComponent(id)}`; if(!state.clientId){toast('لم يتم العثور على CLIENT_ID',true);return;} window.open(url,'_blank');}
-function selectGuild(id){state.guild=state.servers.find(x=>x.id===id);history.replaceState({},'',`/dashboard/?guildId=${id}`);$('#activeServerName').textContent=state.guild.name;$('#guildLabel').textContent=state.guild.memberCount?`${state.guild.memberCount.toLocaleString()} عضو`:'إدارة السيرفر';$('#serverPickerImg').src=state.guild.icon||'/dashboard/images/logo.png';$('#serverPicker').classList.remove('open');loadPage('overview')}
+function selectGuild(id){state.guild=state.servers.find(x=>x.id===id);history.replaceState({},'',`/dashboard/?guildId=${id}`);$('#activeServerName').innerHTML=esc(state.guild.name) + (state.guild.isPremium ? ' <span style="color: #f59e0b; text-shadow: 0 0 8px rgba(245,158,11,0.6);" title="ZETA Premium">👑</span>' : '');$('#guildLabel').textContent=state.guild.memberCount?`${state.guild.memberCount.toLocaleString()} عضو`:'إدارة السيرفر';$('#serverPickerImg').src=state.guild.icon||'/dashboard/images/logo.png';$('#serverPicker').classList.remove('open');loadPage('overview')}
 function showNoGuild(){app.innerHTML=card('لا يوجد سيرفر متصل',`<p>أضف ZETA إلى سيرفر تديره ثم أعد تحميل الصفحة.</p>`)}
 function markActive(page){document.querySelectorAll('.v-nav-item').forEach(x=>x.classList.toggle('active',x.dataset.page===page));document.body.classList.remove('menu-open','mobile-sidebar-open');const b=$('#mobileMenuBtn');b?.setAttribute('aria-expanded','false');b?.setAttribute('aria-label','فتح القائمة')}
 
@@ -278,10 +591,10 @@ overview: async()=>{
            </div>
          </div>
          <div class="zk-badge-box">
-           <span class="zk-badge-ico">👑</span>
+           <span class="zk-badge-ico" style="${d.guild?.isPremium ? 'text-shadow: 0 0 10px rgba(245, 158, 11, 0.8);' : ''}">${d.guild?.isPremium ? '💎' : '⚙️'}</span>
            <div>
              <small>اشتراك السيرفر</small>
-             <b class="zk-text-gold">ZETA PRO ULTRA</b>
+             <b class="zk-text-gold" style="${d.guild?.isPremium ? 'color: #f59e0b; text-shadow: 0 0 8px rgba(245,158,11,0.4);' : 'color: #9cb2a6;'}">${d.guild?.isPremium ? 'ZETA Premium 👑' : 'باقة مجانية (ترقية)'}</b>
            </div>
          </div>
          <button class="zk-hero-action" data-go="settings">
@@ -508,74 +821,292 @@ function suggestionsForm(d){const s=d.settings||{};return `<form id="suggestions
 function reportsForm(d){const s=d.settings||{};return `<form id="reportsForm">${check('تفعيل البلاغات','enabled',s.enabled)}${input('قناة البلاغات','channelId',s.channelId||'')}<div class="v-actions">${formButton()}</div></form><h3>البلاغات</h3>${(d.reports||[]).map(x=>`<div class="v-item"><b>${esc(x.status||'pending')}</b><span>${esc(x.reason||x.content||'')}</span><small>${esc(x.userId||'')}</small></div>`).join('')||empty('لا توجد بلاغات.')}`}
 function pointsForm(d,type){const s=d.settings||d.staffPoints||{};return `<form id="${type}PointsForm"><div class="v-grid two">${check('تفعيل','enabled',s.enabled)}${input('قناة السجلات','logsChannelId',s.logsChannelId||'')}${input('نقاط لكل رسالة','pointsPerMessage',s.pointsPerMessage??1,'number')}${input('Cooldown','cooldownSeconds',s.cooldownSeconds??0,'number')}${input('الحد الأدنى للرسالة','minMessageLength',s.minMessageLength??0,'number')}</div><div class="v-actions">${formButton()}</div></form><h3>المتصدرون</h3><div class="v-table">${(d.leaderboard||[]).map((x,i)=>`<div><b>#${i+1}</b><span>${esc(x.tag||x.userId)}</span><strong>${x.points}</strong></div>`).join('')||empty('لا توجد بيانات بعد.')}</div>`}
 function ticketForm(d,p,channels=[],roles=[]){
- const s=d.settings||{};
- const buttons=s.buttons||[];
- const quick=s.quickButtons||[];
- const textChannels=(channels||[]).filter(c=>Number(c.type)===0||Number(c.type)===5||Number(c.type)===10||Number(c.type)===11||Number(c.type)===12);
- const categories=(channels||[]).filter(c=>Number(c.type)===4);
- const chOpts=(current='')=>channelOptionsHtml(textChannels,current);
- const catOpts=(current='')=>`<option value="">— بدون تصنيف —</option>`+(categories||[]).map(c=>`<option value="${esc(c.id)}" ${String(c.id)===String(current)?'selected':''}>${esc(c.name)}</option>`).join('');
- const roleOpts=(current='')=>roleOptionsHtml(roles,current);
- const display=(v,def)=>v||def;
- return `<form id="ticketsForm">
-   <div class="v-grid two">
-    ${check('تفعيل التذاكر','enabled',s.enabled)}
-    <label class="v-field"><span>قناة لوحة التكت</span><select name="panelChannelId">${chOpts(s.panelChannelId||'')}</select></label>
-    <label class="v-field"><span>التصنيف الافتراضي</span><select name="ticketCategoryId">${catOpts(s.ticketCategoryId||'')}</select></label>
-    <label class="v-field"><span>قناة سجل التذاكر</span><select name="transcriptChannelId">${chOpts(s.transcriptChannelId||'')}</select></label>
-    ${input('عنوان اللوحة','panelTitle',display(s.panelTitle,'فتح تذكرة'))}
-    ${textarea('الوصف','panelDescription',display(s.panelDescription,''))}
-    ${input('لون اللوحة','panelColor',s.panelColor||'#7c5cff')}
-    ${imageField('ticketPanelImage','صورة لوحة التذاكر',s.panelImage||'')}
-    ${imageField('ticketPanelThumbnail','الصورة المصغرة',s.panelThumbnail||'')}
-    ${input('الفوتر','panelFooter',s.panelFooter||'')}
-    ${input('صيغة اسم التذكرة','ticketNameFormat',s.ticketNameFormat||'ticket-{user}')}
-    ${input('حد التذاكر للمستخدم','maxTicketsPerUser',s.maxTicketsPerUser??1,'number')}
-    <label class="v-field"><span>طريقة فتح التذكرة</span><select name="openDisplayType"><option value="buttons" ${s.openDisplayType!=='menu'?'selected':''}>أزرار</option><option value="menu" ${s.openDisplayType==='menu'?'selected':''}>قائمة اختيار</option></select></label>
-    <label class="v-field"><span>طريقة إجراءات التذكرة</span><select name="actionDisplayType"><option value="buttons" ${s.actionDisplayType!=='menu'?'selected':''}>أزرار</option><option value="menu" ${s.actionDisplayType==='menu'?'selected':''}>قائمة اختيار</option></select></label>
-    ${check('زر الإغلاق','closeButton',s.closeButton!==false)}
-    ${check('زر الاستلام','claimButton',s.claimButton!==false)}
-    ${check('زر Transcript','transcriptButton',s.transcriptButton!==false)}
-    ${check('زر حذف التذكرة','deleteButton',s.deleteButton!==false)}
-    ${check('تفعيل التقييم','ratingEnabled',s.ratingEnabled)}
-    <label class="v-field"><span>قناة التقييمات</span><select name="ratingChannelId">${chOpts(s.ratingChannelId||'')}</select></label>
-    <label class="v-field"><span>رتبة الدعم الافتراضية</span><select name="defaultSupportRoleId">${roleOpts(s.defaultSupportRoleId||'')}</select></label>
-   </div>
-   <div class="v-actions">${formButton()}</div>
- </form>
- <section class="v-card inner ticket-emoji-section">
-  <h3>🎫 تخصيص لوحة التكت</h3>
-  <p>نفس فكرة تخصيص لوحة التكت المتقدمة: عنوان، وصف، صور، ألوان، طريقة عرض، وتصنيفات مستقلة لكل زر.</p>
-  <div class="v-item"><b>معاينة سريعة</b><span class="v-muted">يمكنك حفظ الإعدادات ثم إرسال اللوحة من زر الإرسال.</span></div>
-  <form id="ticketButtonAddForm">
-   <div class="v-grid two">
-    ${input('اسم الزر','label','','text','required')}
-    ${emojiPickerField('الإيموجي','emoji')}
-    <label class="v-field"><span>لون الزر</span><select name="style"><option value="Primary">أزرق</option><option value="Success">أخضر</option><option value="Danger">أحمر</option><option value="Secondary">رمادي</option></select></label>
-    <label class="v-field"><span>تصنيف التكت</span><select name="categoryId">${catOpts('')}</select></label>
-    <label class="v-field"><span>رتبة الدعم</span><select name="supportRoleId">${roleOpts('')}</select></label>
-    ${input('المعرف الداخلي','id','support')}
-    ${input('وصف الزر','description')}
-    ${imageField('ticketButtonImage','صورة الزر','')}
-   </div>
-   <div class="v-actions"><button class="v-btn primary" type="submit">＋ إضافة زر التكت</button></div>
-  </form>
-  <div class="v-list">${buttons.map(x=>`<div class="v-row"><span>${x.emoji?`<span class="ticket-emoji-preview">${esc(x.emoji)}</span> `:''}<b>${esc(x.label)}</b><small class="v-muted">${esc(x.style||'Primary')}</small></span><button type="button" class="v-btn danger" data-delete-ticket-button="${esc(x._id)}">حذف</button></div>`).join('')||empty('لا توجد أزرار بعد.')}</div>
- </section>
- <section class="v-card inner ticket-emoji-section">
-  <h3>⚡ تخصيص الأزرار داخل التكت</h3>
-  <p>أزرار جاهزة تظهر داخل التذكرة، مع نفس اختيار الإيموجي المخصص من سيرفرك.</p>
-  <form id="ticketQuickButtonAddForm">
-   <div class="v-grid two">${input('اسم الزر','label','','text','required')}${emojiPickerField('الإيموجي','emoji')}${input('لون الزر','style','Secondary')}${textarea('الرد','response','','required')}</div>
-   <div class="v-actions"><button class="v-btn primary" type="submit">＋ إضافة زر جاهز</button></div>
-  </form>
-  <div class="v-list">${quick.map(x=>`<div class="v-row"><span>${x.emoji?`<span class="ticket-emoji-preview">${esc(x.emoji)}</span> `:''}<b>${esc(x.label)}</b></span><button type="button" class="v-btn danger" data-delete-ticket-quick="${esc(x._id)}">حذف</button></div>`).join('')||empty('لا توجد أزرار جاهزة.')}</div>
- </section>
- <section class="v-card inner">
-  <h3>🧰 البانلات الإضافية</h3>
-  <form id="ticketPanelCreateForm"><div class="v-grid two">${input('اسم البانل','name','','text','required')}</div><div class="v-actions"><button class="v-btn primary" type="submit">＋ إنشاء بانل إضافي</button></div></form>
-  <div class="v-list">${(p.panels||[]).map(x=>`<div class="v-row"><b>${esc(x.name)}</b><button class="v-btn danger" data-delete-panel="ticket-panels/${x._id}">حذف</button></div>`).join('')||empty('لا توجد بانلات إضافية.')}</div>
- </section>`;
+  const lang = localStorage.getItem('zeta_dash_lang') || 'ar';
+  const s=d.settings||{};
+  const buttons=s.buttons||[];
+  const quick=s.quickButtons||[];
+  const textChannels=(channels||[]).filter(c=>Number(c.type)===0||Number(c.type)===5||Number(c.type)===10||Number(c.type)===11||Number(c.type)===12);
+  const categories=(channels||[]).filter(c=>Number(c.type)===4);
+  const chOpts=(current='')=>channelOptionsHtml(textChannels,current);
+  const catOpts=(current='')=>`<option value="">— ${lang === 'ar' ? 'بدون تصنيف' : 'No Category'} —</option>`+(categories||[]).map(c=>`<option value="${esc(c.id)}" ${String(c.id)===String(current)?'selected':''}>${esc(c.name)}</option>`).join('');
+  const roleOpts=(current='')=>roleOptionsHtml(roles,current);
+  const display=(v,def)=>v||def;
+
+  return `
+  <div id="ticket-buttons-data" hidden>${esc(JSON.stringify(buttons))}</div>
+  <div class="welcome-page" dir="${lang === 'ar' ? 'rtl' : 'ltr'}">
+    <div class="welcome-grid" style="display: grid; grid-template-columns: 1.4fr 1fr; gap: 24px; align-items: start; max-width: 1440px; margin: 0 auto;">
+      <!-- Configuration Column -->
+      <div class="welcome-controls">
+        <section class="v-card" style="padding: 24px; border-radius: 16px; border: 1px solid var(--vx-line); background: var(--vx-card); margin-bottom: 24px; position: relative;">
+          
+          <!-- Header -->
+          <div class="welcome-card-header" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--vx-line);">
+            <div>
+              <h2 style="font-size: 19px; font-weight: 800; display: flex; align-items: center; gap: 8px; margin: 0; color: #ffffff;">
+                <span>🎫</span> ${tDash('tickets.title')}
+              </h2>
+              <p class="v-muted" style="margin: 6px 0 0 0; font-size: 13px;">${tDash('tickets.desc')}</p>
+            </div>
+            <form id="ticketsEnabledForm" style="margin: 0;">
+              <div class="welcome-toggle-box" style="margin: 0; display: flex; align-items: center; gap: 10px; background: var(--vx-blue-soft); padding: 8px 16px; border-radius: 12px; border: 1px solid var(--vx-blue-line);">
+                <label class="v-check" style="margin: 0; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+                  <input type="checkbox" name="enabled" id="ticketEnabledToggle" ${s.enabled?'checked':''}>
+                  <b style="font-size: 13px; color: var(--vx-green-bright)">${tDash('tickets.enabled_toggle')}</b>
+                </label>
+              </div>
+            </form>
+          </div>
+
+          <!-- Segmented Navigation / Tabs -->
+          <div style="display: flex; gap: 6px; margin-bottom: 24px; background: rgba(255,255,255,0.02); border: 1px solid var(--vx-line); padding: 5px; border-radius: 12px; flex-wrap: wrap;">
+            <button type="button" class="v-btn" id="tab-btn-general" style="flex: 1; min-width: 120px; height: 38px; border-radius: 8px; font-size: 12.5px; font-weight: 700; transition: all 0.15s ease;" onclick="window.switchTicketTab('general')">${tDash('tickets.tab_general')}</button>
+            <button type="button" class="v-btn ghost" id="tab-btn-panel" style="flex: 1; min-width: 120px; height: 38px; border-radius: 8px; font-size: 12.5px; font-weight: 700; transition: all 0.15s ease;" onclick="window.switchTicketTab('panel')">${tDash('tickets.tab_panel')}</button>
+            <button type="button" class="v-btn ghost" id="tab-btn-buttons" style="flex: 1; min-width: 120px; height: 38px; border-radius: 8px; font-size: 12.5px; font-weight: 700; transition: all 0.15s ease;" onclick="window.switchTicketTab('buttons')">${tDash('tickets.tab_buttons')}</button>
+            <button type="button" class="v-btn ghost" id="tab-btn-inner" style="flex: 1; min-width: 120px; height: 38px; border-radius: 8px; font-size: 12.5px; font-weight: 700; transition: all 0.15s ease;" onclick="window.switchTicketTab('inner')">${tDash('tickets.tab_inner')}</button>
+            <button type="button" class="v-btn ghost" id="tab-btn-extra" style="flex: 1; min-width: 120px; height: 38px; border-radius: 8px; font-size: 12.5px; font-weight: 700; transition: all 0.15s ease;" onclick="window.switchTicketTab('extra')">${tDash('tickets.tab_extra')}</button>
+          </div>
+
+          <!-- Form for general & visual panel settings -->
+          <form id="ticketsForm">
+            <!-- Form-wide hidden enabled status that updates on toggle change -->
+            <input type="hidden" name="enabled" id="formEnabledField" value="${s.enabled?'true':'false'}">
+
+            <!-- Tab 1: General Settings -->
+            <div id="ticket-sec-general" class="ticket-sec">
+              <h3 style="margin-top: 0; font-size: 15px; margin-bottom: 16px; font-weight: 700; color: var(--vx-green-bright); display: flex; align-items: center; gap: 6px;">${tDash('tickets.general_title')}</h3>
+              <div class="v-grid two" style="margin-bottom: 16px;">
+                <label class="v-field"><span>${tDash('tickets.panel_channel')}</span><select name="panelChannelId" id="panelChannelIdSelect">${chOpts(s.panelChannelId||'')}</select></label>
+                <label class="v-field"><span>${tDash('tickets.default_category')}</span><select name="ticketCategoryId">${catOpts(s.ticketCategoryId||'')}</select></label>
+                <label class="v-field"><span>${tDash('tickets.transcript_channel')}</span><select name="transcriptChannelId">${chOpts(s.transcriptChannelId||'')}</select></label>
+                <label class="v-field"><span>${tDash('tickets.support_role')}</span><select name="defaultSupportRoleId">${roleOpts(s.defaultSupportRoleId||'')}</select></label>
+                ${input(tDash('tickets.name_format'), 'ticketNameFormat', s.ticketNameFormat||'ticket-{user}', 'text', 'placeholder="ticket-{user}"')}
+                ${input(tDash('tickets.max_per_user'), 'maxTicketsPerUser', s.maxTicketsPerUser??1, 'number', 'min="1" max="10"')}
+              </div>
+
+              <!-- Ticket Welcome Template Customization -->
+              <div style="margin-top: 24px; border-top: 1px solid var(--vx-line-2); padding-top: 20px;">
+                <h4 style="margin: 0 0 6px; font-size: 13.5px; font-weight: 700; color: #ffffff;">💬 ${tDash('tickets.welcome_template_label')}</h4>
+                <p class="v-muted" style="margin: 0 0 12px 0; font-size: 12px;">${lang === 'ar' ? 'تخصيص نص رسالة الترحيب التي يتم إرسالها داخل روم التكت المفتوحة لكل الأقسام.' : 'Customize the welcome text template sent inside newly opened ticket channels.'}</p>
+                <label class="v-field">
+                  <span>${tDash('tickets.welcome_template_label')}</span>
+                  <textarea name="ticketWelcomeTemplate" rows="3" style="width: 100%; min-height: 80px; padding: 10px; border-radius: 8px; border: 1px solid var(--vx-line); background: rgba(0,0,0,0.15); color: #fff; font-family: inherit; font-size: 13px;" placeholder="${tDash('tickets.welcome_template_placeholder')}">${esc(s.ticketWelcomeTemplate || '')}</textarea>
+                </label>
+                <small class="v-muted" style="margin-top: 4px; display: block; font-size: 11px;">
+                  ${lang === 'ar' ? 'الاختصارات المدعومة:' : 'Supported Placeholders:'} <code>{user}</code> (منشن), <code>{username}</code>, <code>{label}</code> (اسم القسم), <code>{server}</code>
+                </small>
+              </div>
+
+              <!-- Inactivity Auto Close Settings -->
+              <div style="margin-top: 24px; border-top: 1px solid var(--vx-line-2); padding-top: 20px; margin-bottom: 16px;">
+                <h4 style="margin: 0 0 12px; font-size: 13.5px; font-weight: 700; color: #ffffff;">⏳ ${tDash('tickets.auto_close_section')}</h4>
+                <div class="v-grid two" style="gap: 16px;">
+                  ${check(tDash('tickets.auto_close_enabled'), 'autoCloseEnabled', s.autoCloseEnabled)}
+                  ${input(tDash('tickets.auto_close_minutes'), 'autoCloseMinutes', s.autoCloseMinutes ?? 1440, 'number', 'min="10" max="10080"')}
+                </div>
+              </div>
+
+              <div style="margin-top: 24px; border-top: 1px solid var(--vx-line-2); padding-top: 20px; margin-bottom: 16px;">
+                <h4 style="margin: 0 0 12px; font-size: 13.5px; font-weight: 700; color: #ffffff;">${tDash('tickets.action_buttons')}</h4>
+                <div class="v-grid two">
+                  ${check(tDash('tickets.close_btn'), 'closeButton', s.closeButton!==false)}
+                  ${check(tDash('tickets.claim_btn'), 'claimButton', s.claimButton!==false)}
+                  ${check(tDash('tickets.transcript_btn'), 'transcriptButton', s.transcriptButton!==false)}
+                  ${check(tDash('tickets.delete_btn'), 'deleteButton', s.deleteButton!==false)}
+                  ${check(tDash('tickets.rating_enabled'), 'ratingEnabled', s.ratingEnabled)}
+                </div>
+              </div>
+
+              <div style="margin-top: 16px; margin-bottom: 20px;">
+                <label class="v-field"><span>${tDash('tickets.rating_channel')}</span><select name="ratingChannelId">${chOpts(s.ratingChannelId||'')}</select></label>
+              </div>
+
+              <div style="display: flex; justify-content: flex-end; border-top: 1px solid var(--vx-line); padding-top: 16px; gap: 8px;">
+                ${formButton(tDash('ui.save'))}
+              </div>
+            </div>
+
+            <!-- Tab 2: Panel Visual Customizer -->
+            <div id="ticket-sec-panel" class="ticket-sec" style="display: none;">
+              <h3 style="margin-top: 0; font-size: 15px; margin-bottom: 16px; font-weight: 700; color: var(--vx-green-bright); display: flex; align-items: center; gap: 6px;">${tDash('tickets.visual_title')}</h3>
+              <div class="v-grid two" style="margin-bottom: 16px;">
+                ${input(tDash('tickets.panel_title'), 'panelTitle', display(s.panelTitle, lang==='ar'?'فتح تذكرة':'Open Ticket'), 'text', 'id="panelTitleInput"')}
+                ${input(tDash('tickets.panel_color'), 'panelColor', s.panelColor||'#7c5cff', 'color', 'id="panelColorInput" style="height: 42px; padding: 2px 6px; cursor: pointer;"')}
+                ${imageField('ticketPanelImage', tDash('tickets.panel_image'), s.panelImage||'')}
+                ${imageField('ticketPanelThumbnail', tDash('tickets.panel_thumbnail'), s.panelThumbnail||'')}
+                ${input(tDash('tickets.panel_footer'), 'panelFooter', s.panelFooter||'', 'text', `id="panelFooterInput" placeholder="${lang==='ar'?'مثال: الدعم الفني':'E.g., ZETA Support'}"`)}
+                <label class="v-field">
+                  <span>${tDash('tickets.display_type')}</span>
+                  <select name="openDisplayType" id="openDisplayTypeSelect">
+                    <option value="buttons" ${s.openDisplayType!=='menu'?'selected':''}>${tDash('tickets.display_buttons')}</option>
+                    <option value="menu" ${s.openDisplayType==='menu'?'selected':''}>${tDash('tickets.display_menu')}</option>
+                  </select>
+                </label>
+              </div>
+
+              <div style="margin-bottom: 20px;">
+                <label class="v-field"><span>${tDash('tickets.panel_desc')}</span><textarea name="panelDescription" id="panelDescriptionInput" rows="4">${esc(display(s.panelDescription, lang === 'ar' ? 'هل تحتاج إلى مساعدة؟\\nاضغط أحد الأزرار بالأسفل لفتح تذكرة جديدة.' : 'Need help?\\nPress a button below to open a ticket.'))}</textarea></label>
+              </div>
+
+              <div style="display: flex; justify-content: flex-end; border-top: 1px solid var(--vx-line); padding-top: 16px;">
+                ${formButton(tDash('ui.save'))}
+              </div>
+            </div>
+          </form>
+        </section>
+
+        <!-- Tab 3: Buttons & Categories Panel -->
+        <div class="ticket-sec" id="ticket-sec-buttons" style="display: none;">
+          <section class="v-card" style="padding: 24px; border-radius: 16px; border: 1px solid var(--vx-line); background: var(--vx-card); margin-bottom: 24px;">
+            <h3 style="margin-top: 0; font-size: 15px; margin-bottom: 8px; font-weight: 700; color: var(--vx-green-bright); display: flex; align-items: center; gap: 6px;">${tDash('tickets.categories_title')}</h3>
+            <p class="v-muted" style="margin-top: 0; margin-bottom: 16px; font-size: 13px;">${tDash('tickets.categories_desc')}</p>
+            
+            <form id="ticketButtonAddForm">
+              <div class="v-grid two" style="margin-bottom: 16px;">
+               ${input(tDash('tickets.btn_label'),'label','','text',`required placeholder="${lang==='ar'?'مثال: الاستفسارات العامة':'E.g., General Inquiries'}"`)}
+               ${emojiPickerField(tDash('tickets.btn_emoji'),'emoji')}
+               <label class="v-field"><span>${tDash('tickets.btn_style')}</span><select name="style"><option value="Primary">${lang==='ar'?'أزرق (Primary)':'Blue (Primary)'}</option><option value="Success">${lang==='ar'?'أخضر (Success)':'Green (Success)'}</option><option value="Danger">${lang==='ar'?'أحمر (Danger)':'Red (Danger)'}</option><option value="Secondary">${lang==='ar'?'رمادي (Secondary)':'Grey (Secondary)'}</option></select></label>
+               <label class="v-field"><span>${tDash('tickets.btn_category')}</span><select name="categoryId">${catOpts('')}</select></label>
+               <label class="v-field"><span>${tDash('tickets.btn_support_role')}</span><select name="supportRoleId">${roleOpts('')}</select></label>
+               ${input(tDash('tickets.btn_custom_id'),'id','support')}
+               ${imageField('ticketButtonImage', tDash('tickets.btn_image'), '')}
+              </div>
+              <div style="margin-bottom: 20px;">
+                <label class="v-field"><span>${tDash('tickets.btn_welcome_msg')}</span><textarea name="description" rows="3" placeholder="${lang==='ar'?'أهلاً بك، كيف يمكننا مساعدتك اليوم؟':'Welcome, how can we help you today?'}$"></textarea></label>
+              </div>
+              <div class="v-actions" style="margin-bottom: 24px; display: flex; justify-content: flex-end;">
+                <button class="v-btn primary" type="submit">${tDash('tickets.btn_add')}</button>
+              </div>
+            </form>
+
+            <h4 style="border-top: 1px solid var(--vx-line); padding-top: 16px; font-size: 14px; font-weight: 700; margin-bottom: 12px; color: #ffffff;">${tDash('tickets.current_buttons')}</h4>
+            <div class="v-list" style="display: flex; flex-direction: column; gap: 8px;">
+              ${buttons.map(x=>`<div class="v-row" style="display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; background: rgba(255,255,255,0.01); border: 1px solid var(--vx-line); border-radius: 10px;">
+                <span style="display: flex; align-items: center; gap: 8px;">
+                  ${x.emoji?`<span class="ticket-emoji-preview" style="font-size: 18px;">${esc(x.emoji)}</span> `:''}
+                  <b style="font-size: 13.5px; color: #ffffff;">${esc(x.label)}</b>
+                  <span aria-hidden="true" style="color: var(--vx-ink-3);">·</span>
+                  <small style="color: var(--vx-ink-2); font-weight: 600; font-size: 11.5px; padding: 2px 6px; background: rgba(255,255,255,0.04); border-radius: 4px;">${esc(x.style||'Primary')}</small>
+                </span>
+                <button type="button" class="v-btn danger" style="height: 30px; padding: 0 12px; font-size: 12px; border-radius: 6px;" data-delete-ticket-button="${esc(x._id)}">${tDash('ui.delete')}</button>
+              </div>`).join('')||empty(tDash('tickets.no_buttons'))}
+            </div>
+          </section>
+        </div>
+
+        <!-- Tab 4: Quick Buttons (Buttons Inside Ticket) -->
+        <div class="ticket-sec" id="ticket-sec-inner" style="display: none;">
+          <section class="v-card" style="padding: 24px; border-radius: 16px; border: 1px solid var(--vx-line); background: var(--vx-card); margin-bottom: 24px;">
+            <h3 style="margin-top: 0; font-size: 15px; margin-bottom: 8px; font-weight: 700; color: var(--vx-green-bright); display: flex; align-items: center; gap: 6px;">${tDash('tickets.quick_title')}</h3>
+            <p class="v-muted" style="margin-top: 0; margin-bottom: 16px; font-size: 13px;">${tDash('tickets.quick_desc')}</p>
+            
+            <form id="ticketQuickButtonAddForm">
+              <div class="v-grid two" style="margin-bottom: 12px;">
+                ${input(tDash('tickets.btn_label'),'label','','text',`required placeholder="${lang==='ar'?'مثال: تسليم الطلب':'E.g., Deliver Order'}"`)}
+                ${emojiPickerField(tDash('tickets.btn_emoji'),'emoji')}
+                <label class="v-field"><span>${tDash('tickets.btn_style')}</span><select name="style"><option value="Secondary">${lang==='ar'?'رمادي (Secondary)':'Grey (Secondary)'}</option><option value="Primary">${lang==='ar'?'أزرق (Primary)':'Blue (Primary)'}</option><option value="Success">${lang==='ar'?'أخضر (Success)':'Green (Success)'}</option><option value="Danger">${lang==='ar'?'أحمر (Danger)':'Red (Danger)'}</option></select></label>
+              </div>
+              <div style="margin-bottom: 20px;">
+                <label class="v-field"><span>${tDash('tickets.quick_response_text')}</span><textarea name="response" rows="4" required placeholder="${lang==='ar'?'أهلاً بك، تم تسليم طلبك بنجاح! شكراً لتعاملك معنا.':'Welcome, your order has been delivered successfully! Thanks for dealing with us.'}"></textarea></label>
+              </div>
+              <div class="v-actions" style="margin-bottom: 24px; display: flex; justify-content: flex-end;">
+                <button class="v-btn primary" type="submit">${tDash('tickets.quick_btn_add')}</button>
+              </div>
+            </form>
+
+            <h4 style="border-top: 1px solid var(--vx-line); padding-top: 16px; font-size: 14px; font-weight: 700; margin-bottom: 12px; color: #ffffff;">${tDash('tickets.quick_current')}</h4>
+            <div class="v-list" style="display: flex; flex-direction: column; gap: 8px;">
+              ${quick.map(x=>`<div class="v-row" style="display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; background: rgba(255,255,255,0.01); border: 1px solid var(--vx-line); border-radius: 10px;">
+                <span style="display: flex; align-items: center; gap: 8px;">
+                  ${x.emoji?`<span class="ticket-emoji-preview" style="font-size: 18px;">${esc(x.emoji)}</span> `:''}
+                  <b style="font-size: 13.5px; color: #ffffff;">${esc(x.label)}</b>
+                </span>
+                <button type="button" class="v-btn danger" style="height: 30px; padding: 0 12px; font-size: 12px; border-radius: 6px;" data-delete-ticket-quick="${esc(x._id)}">${tDash('ui.delete')}</button>
+              </div>`).join('')||empty(tDash('tickets.quick_no_buttons'))}
+            </div>
+          </section>
+        </div>
+
+        <!-- Tab 5: Extra Panels -->
+        <div class="ticket-sec" id="ticket-sec-extra" style="display: none;">
+          <section class="v-card" style="padding: 24px; border-radius: 16px; border: 1px solid var(--vx-line); background: var(--vx-card); margin-bottom: 24px;">
+            <h3 style="margin-top: 0; font-size: 15px; margin-bottom: 8px; font-weight: 700; color: var(--vx-green-bright); display: flex; align-items: center; gap: 6px;">${tDash('tickets.extra_title')}</h3>
+            <p class="v-muted" style="margin-top: 0; margin-bottom: 16px; font-size: 13px;">${tDash('tickets.extra_desc')}</p>
+            
+            <form id="ticketPanelCreateForm" style="margin-bottom: 20px;">
+              <div class="v-grid two" style="align-items: flex-end; gap: 16px;">
+                ${input(tDash('tickets.extra_new_name'),'name','','text',`required placeholder="${lang==='ar'?'مثال: الإدارة العامة':'E.g., General Management'}"`)}
+                <button class="v-btn primary" style="height: 42px;" type="submit">${tDash('tickets.extra_create')}</button>
+              </div>
+            </form>
+
+            <h4 style="border-top: 1px solid var(--vx-line); padding-top: 16px; font-size: 14px; font-weight: 700; margin-bottom: 12px; color: #ffffff;">${tDash('tickets.extra_current')}</h4>
+            <div class="v-list" style="display: flex; flex-direction: column; gap: 8px;">
+              ${(p.panels||[]).map(x=>`<div class="v-row" style="display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; background: rgba(255,255,255,0.01); border: 1px solid var(--vx-line); border-radius: 10px;">
+                <b style="font-size: 13.5px; color: #ffffff;">${esc(x.name)}</b>
+                <button class="v-btn danger" style="height: 30px; padding: 0 12px; font-size: 12px; border-radius: 6px;" data-delete-panel="ticket-panels/${x._id}">${tDash('ui.delete')}</button>
+              </div>`).join('')||empty(tDash('tickets.extra_no_panels'))}
+            </div>
+          </section>
+        </div>
+      </div>
+
+      <!-- Preview Column -->
+      <div class="welcome-preview-column" style="position: sticky; top: 92px;">
+        <div class="discord-preview-wrap" style="background: #1e1f22; border: 1px solid rgba(255,255,255,0.05); border-radius: 14px; overflow: hidden; box-shadow: 0 8px 32px rgba(0,0,0,0.4);">
+          <!-- Channel Bar -->
+          <div class="discord-preview-bar" style="background: #2b2d31; padding: 10px 16px; border-bottom: 1px solid rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: space-between; color: #dbdee1;">
+            <div class="discord-preview-channel" style="display: flex; align-items: center; gap: 6px; font-weight: 700; font-size: 13.5px;">
+              <span style="color:#80848e">#</span>
+              <span id="ticketPreviewChannelName">support</span>
+            </div>
+            <span style="font-size:11px;color:#949ba4;font-weight:600;">${tDash('tickets.preview_banner_text')}</span>
+          </div>
+
+          <!-- Message Area -->
+          <div class="discord-preview-inner" style="background: #313338; padding: 16px; display: flex; gap: 14px;">
+            <img class="discord-bot-avatar" src="/dashboard/images/logo.png" alt="ZETA" style="width: 40px; height: 40px; border-radius: 50%; background: #070c0a; border: 1px solid rgba(52,211,153,0.3);">
+            <div class="discord-msg-content" style="flex: 1; min-width: 0;">
+              <div class="discord-msg-header" style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                <span class="discord-bot-name" style="font-weight: 700; color: #ffffff; font-size: 14px;">ZETA</span>
+                <span class="discord-bot-tag" style="background: #5865f2; color: #ffffff; font-size: 10px; padding: 1px 4px; border-radius: 3px; font-weight: 700; line-height: 1.2;">BOT ✓</span>
+                <span class="discord-msg-time" style="color: #949ba4; font-size: 11px; font-weight: 600;">${lang === 'ar' ? 'اليوم في 12:30 م' : 'Today at 12:30 PM'}</span>
+              </div>
+
+              <!-- Custom Embedded Ticket Panel Preview -->
+              <div id="liveTicketEmbed" style="border-inline-start: 4px solid #7c5cff; padding: 12px 16px; border-radius: 6px; background: #2b2d31; margin-top: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); max-width: 460px; display: flex; flex-direction: column; gap: 8px; border: 1px solid rgba(255,255,255,0.02); border-inline-start-width: 4px;">
+                
+                <!-- Title & Description with Thumbnail -->
+                <div style="display: flex; justify-content: space-between; gap: 12px; align-items: start;">
+                  <div style="flex: 1; min-width: 0;">
+                    <h3 id="liveTicketEmbedTitle" style="margin: 0 0 6px 0; color: #ffffff; font-size: 15px; font-weight: 700;">${lang === 'ar' ? 'فتح تذكرة' : 'Open Ticket'}</h3>
+                    <div id="liveTicketEmbedDescription" style="color: #dbdee1; font-size: 13.5px; white-space: pre-wrap; line-height: 1.45; word-wrap: break-word;">${lang === 'ar' ? 'هل تحتاج إلى مساعدة؟\\nاضغط أحد الأزرار بالأسفل لفتح تذكرة جديدة.' : 'Need help?\\nPress a button below to open a ticket.'}</div>
+                  </div>
+                  <img id="liveTicketEmbedThumbnail" src="" style="width: 64px; height: 64px; border-radius: 6px; object-fit: cover; display: none;" onerror="this.style.display='none'">
+                </div>
+
+                <!-- Large Banner -->
+                <img id="liveTicketEmbedBanner" src="" style="width: 100%; border-radius: 6px; max-height: 200px; object-fit: cover; display: none; margin-top: 4px;" onerror="this.style.display='none'">
+
+                <!-- Footer -->
+                <div id="liveTicketEmbedFooterSection" style="margin-top: 4px; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 6px; color: #949ba4; font-size: 11px; display: flex; align-items: center; gap: 6px;">
+                  <span id="liveTicketEmbedFooterText">ZETA — ${lang === 'ar' ? 'نظام الدعم الفني' : 'Technical Support'}</span>
+                  <span>•</span>
+                  <span>${lang === 'ar' ? 'الآن' : 'Now'}</span>
+                </div>
+              </div>
+
+              <!-- Interactive Controls Preview -->
+              <div id="liveTicketInteractiveControls" style="margin-top: 10px; display: flex; flex-wrap: wrap; gap: 6px; max-width: 460px;">
+                <!-- Populated dynamically via JS -->
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>`;
 }
 function applicationForm(d,p){return `<div class="v-actions">${btn('+ إنشاء بانل تقديم','primary','data-add-application-panel')}</div><h3>طلبات التقديم</h3>${(d.applications||[]).map(x=>`<div class="v-item"><b>${esc(x.status||'pending')}</b><span>${esc(x.userId||'')}</span><small>${esc(x._id||'')}</small></div>`).join('')||empty('لا توجد طلبات بعد.')}<h3>بانلات التقديم</h3>${(p.panels||[]).map(x=>`<div class="v-item"><b>${esc(x.name)}</b><span>${x.enabled===false?'متوقف':'فعال'}</span></div>`).join('')||empty('لا توجد بانلات.')}`}
 function commandForm(d){const states=d.commandStates||d.states||[];return `<div class="v-grid two">${states.map(x=>`<label class="v-check"><input type="checkbox" data-command-state="${esc(x.command)}" ${x.enabled!==false?'checked':''}><span>/${esc(x.command)}</span></label>`).join('')}</div><div class="v-actions">${btn('حفظ الحالات','primary','data-save-command-states')}</div>`}
@@ -1061,7 +1592,7 @@ function bindPage(page){
       });
       o={events};
     }
-    if(page==='tickets')o=Object.fromEntries(Object.entries(o).map(([k,v])=>[k,k==='maxTicketsPerUser'?Number(v):v]));
+    if(page==='tickets')o=Object.fromEntries(Object.entries(o).map(([k,v])=>[k,['maxTicketsPerUser','autoCloseMinutes'].includes(k)?Number(v):v]));
     if(page==='interaction-points')o={enabled:o.enabled,pointsPerMessage:Number(o.pointsPerMessage),cooldownSeconds:Number(o.cooldownSeconds),minMessageLength:Number(o.minMessageLength),logsChannelId:o.logsChannelId};
     try{await api(`/admin/${state.guild.id}${endpointMap[page][0]}`,{method:'POST',body:JSON.stringify(o)});toast('تم الحفظ بنجاح ✓');}catch(err){toast(err.message,true)}
   });
@@ -1314,6 +1845,185 @@ function bindPage(page){
   app.querySelectorAll('[data-delete-panel]').forEach(b=>b.onclick=async()=>{if(!confirm('حذف هذه اللوحة؟'))return;try{await api(`/admin/${state.guild.id}/${b.dataset.deletePanel}`,{method:'DELETE'});toast('تم الحذف');loadPage(page)}catch(e){toast(e.message,true)}});
   app.querySelectorAll('[data-emoji-picker]').forEach(b=>b.addEventListener('click',()=>openEmojiPicker(b)));
   if(page==='tickets'){
+    // Expose window switch function for the tabs
+    window.switchTicketTab = (tabId) => {
+      state.activeTicketTab = tabId;
+      app.querySelectorAll('.ticket-sec').forEach(sec => sec.style.display = 'none');
+      const activeSec = app.querySelector(`#ticket-sec-${tabId}`);
+      if(activeSec) activeSec.style.display = 'block';
+
+      // Switch button styles
+      app.querySelectorAll('[id^="tab-btn-"]').forEach(btn => {
+        btn.classList.add('ghost');
+        btn.style.background = 'transparent';
+        btn.style.border = '1px solid transparent';
+        btn.style.color = 'var(--vx-ink-2)';
+      });
+      const activeBtn = app.querySelector(`#tab-btn-${tabId}`);
+      if(activeBtn) {
+        activeBtn.classList.remove('ghost');
+        activeBtn.style.background = 'var(--vx-blue-soft)';
+        activeBtn.style.border = '1px solid var(--vx-blue-line)';
+        activeBtn.style.color = 'var(--vx-green-bright)';
+      }
+    };
+
+    // Live preview function
+    const updateTicketPreview = () => {
+      const titleInput = app.querySelector('#panelTitleInput');
+      const colorInput = app.querySelector('#panelColorInput');
+      const descInput = app.querySelector('#panelDescriptionInput');
+      const footerInput = app.querySelector('#panelFooterInput');
+      const thumbInput = app.querySelector('input[name="ticketPanelThumbnail"]');
+      const bannerInput = app.querySelector('input[name="ticketPanelImage"]');
+      const chanSelect = app.querySelector('#panelChannelIdSelect');
+      const displaySelect = app.querySelector('#openDisplayTypeSelect');
+
+      const embedEl = app.querySelector('#liveTicketEmbed');
+      const embedTitleEl = app.querySelector('#liveTicketEmbedTitle');
+      const embedDescEl = app.querySelector('#liveTicketEmbedDescription');
+      const embedThumbEl = app.querySelector('#liveTicketEmbedThumbnail');
+      const embedBannerEl = app.querySelector('#liveTicketEmbedBanner');
+      const embedFooterEl = app.querySelector('#liveTicketEmbedFooterText');
+      const controlsEl = app.querySelector('#liveTicketInteractiveControls');
+      const channelNameEl = app.querySelector('#ticketPreviewChannelName');
+
+      if (!embedEl) return;
+
+      // Title
+      if (titleInput && embedTitleEl) {
+        embedTitleEl.textContent = titleInput.value.trim() || 'فتح تذكرة';
+      }
+
+      // Color
+      if (colorInput && embedEl) {
+        embedEl.style.borderInlineStartColor = colorInput.value || '#7c5cff';
+      }
+
+      // Description
+      if (descInput && embedDescEl) {
+        const text = descInput.value;
+        embedDescEl.innerHTML = parseDiscordMarkdown(text, state.guild?.name || 'سيرفر ZETA', state.guild?.memberCount || 154);
+      }
+
+      // Thumbnail
+      if (thumbInput && embedThumbEl) {
+        const val = thumbInput.value.trim();
+        if (val) {
+          embedThumbEl.src = val;
+          embedThumbEl.style.display = 'block';
+        } else {
+          embedThumbEl.style.display = 'none';
+        }
+      }
+
+      // Banner
+      if (bannerInput && embedBannerEl) {
+        const val = bannerInput.value.trim();
+        if (val) {
+          embedBannerEl.src = val;
+          embedBannerEl.style.display = 'block';
+        } else {
+          embedBannerEl.style.display = 'none';
+        }
+      }
+
+      // Footer
+      if (footerInput && embedFooterEl) {
+        embedFooterEl.textContent = footerInput.value.trim() || (state.guild?.name || 'ZETA Bot') + ' — نظام الدعم الفني';
+      }
+
+      // Channel name preview
+      if (chanSelect && channelNameEl) {
+        const opt = chanSelect.options[chanSelect.selectedIndex];
+        channelNameEl.textContent = opt && opt.text && !opt.text.startsWith('—') ? opt.text.replace(/^[#\s]+/, '') : 'support';
+      }
+
+      // Interactive controls (Buttons or Select Menu)
+      if (displaySelect && controlsEl) {
+        const dataBox = app.querySelector('#ticket-buttons-data');
+        let btns = [];
+        try {
+          btns = dataBox ? JSON.parse(dataBox.textContent) : [];
+        } catch (e) {
+          console.error(e);
+        }
+
+        const openType = displaySelect.value;
+        if (openType === 'menu') {
+          controlsEl.innerHTML = `
+            <div style="width: 100%; padding: 10px 14px; background: #2b2d31; border: 1px solid rgba(0,0,0,0.2); border-radius: 4px; display: flex; justify-content: space-between; align-items: center; color: #949ba4; font-size: 13px; font-weight: 600;">
+              <span>🎫 اختر نوع التذكرة اللي تبي تفتحها...</span>
+              <span style="font-size: 10px; transform: scaleY(0.6);">▼</span>
+            </div>
+          `;
+        } else {
+          // Render buttons
+          if (btns.length === 0) {
+            controlsEl.innerHTML = `
+              <button type="button" style="display: inline-flex; align-items: center; gap: 6px; padding: 7px 16px; border-radius: 3px; font-size: 13.5px; font-weight: 600; color: #ffffff; background: #da373c; border: 0; cursor: default;">
+                🎫 فتح تذكرة
+              </button>
+            `;
+          } else {
+            const btnStyles = {
+              Primary: '#5865f2',
+              Success: '#248046',
+              Danger: '#da373c',
+              Secondary: '#4e5058'
+            };
+            controlsEl.innerHTML = btns.slice(0, 5).map(b => {
+              const bg = btnStyles[b.style] || btnStyles.Primary;
+              return `
+                <button type="button" style="display: inline-flex; align-items: center; gap: 6px; padding: 7px 16px; border-radius: 3px; font-size: 13.5px; font-weight: 600; color: #ffffff; background: ${bg}; border: 0; cursor: default; white-space: nowrap;">
+                  ${b.emoji ? `<span style="font-size: 14px;">${esc(b.emoji)}</span>` : '🎫'}
+                  <span>${esc(b.label)}</span>
+                </button>
+              `;
+            }).join('');
+          }
+        }
+      }
+    };
+
+    // Bind preview listeners
+    app.querySelectorAll('#panelTitleInput, #panelColorInput, #panelDescriptionInput, #panelFooterInput, #openDisplayTypeSelect, #panelChannelIdSelect').forEach(el => {
+      el.addEventListener('input', updateTicketPreview);
+      el.addEventListener('change', updateTicketPreview);
+    });
+
+    const watchImageInputs = () => {
+      const tInput = app.querySelector('input[name="ticketPanelThumbnail"]');
+      const bInput = app.querySelector('input[name="ticketPanelImage"]');
+      if (tInput) {
+        tInput.addEventListener('input', updateTicketPreview);
+        tInput.addEventListener('change', updateTicketPreview);
+      }
+      if (bInput) {
+        bInput.addEventListener('input', updateTicketPreview);
+        bInput.addEventListener('change', updateTicketPreview);
+      }
+    };
+
+    // Toggle save instantly
+    app.querySelector('#ticketEnabledToggle')?.addEventListener('change', async e => {
+      const toggle = e.target;
+      const hidden = app.querySelector('#formEnabledField');
+      if (hidden) {
+        hidden.value = toggle.checked ? 'true' : 'false';
+      }
+      // Submit the form to instantly save the enabled status
+      const ticketsForm = app.querySelector('#ticketsForm');
+      if (ticketsForm) {
+        ticketsForm.dispatchEvent(new Event('submit', { bubbles: true }));
+      }
+    });
+
+    // Active tab and initial preview call
+    window.switchTicketTab(state.activeTicketTab || 'general');
+    updateTicketPreview();
+    setTimeout(watchImageInputs, 500); // Allow image binding to run
+
     app.querySelector('#ticketPanelCreateForm')?.addEventListener('submit',async e=>{
       e.preventDefault();
       const o=formDataObj(e.currentTarget);

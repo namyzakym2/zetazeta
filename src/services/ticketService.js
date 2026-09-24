@@ -305,9 +305,25 @@ async function createTicket(guild, member, button, options = {}, panelId = 'main
 
   const image = options.image || button?.image || settings?.panelImage;
 
+  let welcomeText = button?.description || 'أهلاً بك في نظام الدعم الفني الخاص بنا. يرجى توضيح استفسارك أو مشكلتك بالتفصيل وسيقوم الطاقم الإداري بالرد عليك ومساعدتك في أقرب وقت.';
+  if (settings?.ticketWelcomeTemplate) {
+    welcomeText = settings.ticketWelcomeTemplate
+      .replace(/{user}/g, `<@${member.id}>`)
+      .replace(/{username}/g, member.user.username)
+      .replace(/{label}/g, button?.label || 'عام')
+      .replace(/{server}/g, guild.name);
+  }
+
   const description =
-    (button?.description || 'أهلًا بك في الدعم 😈\n\nاشرح مشكلتك بالتفصيل وانتظر أحد أعضاء الفريق.') +
-    `\n\n👤 **صاحب التذكرة:** <@${member.id}>\n📁 **التصنيف:** ${button?.label || 'عام'}`;
+    `👋 **أهلاً بك في تذكرتك يا <@${member.id}>!**\n\n` +
+    `> ${welcomeText}\n\n` +
+    `✨ **تفاصيل التذكرة / Ticket Information:**\n` +
+    `👤 **صاحب التذكرة:** <@${member.id}>\n` +
+    `📁 **القسم الحالي:** \`${button?.label || 'عام'}\`\n` +
+    `🕒 **تاريخ الفتح:** <t:${Math.floor(Date.now() / 1000)}:f>\n\n` +
+    `⚠️ **تعليمات هامة / General Rules:**\n` +
+    `• يرجى كتابة استفسارك كاملاً وبشكل مباشر في رسالة واحدة لضمان سرعة خدمتك.\n` +
+    `• سيتم إخطار فريق الدعم، يرجى التحلي بالصبر وتجنب تكرار الإشارة للإدارة.`;
 
   const rows = buildTicketActionRows(ticket, settings);
 
@@ -534,6 +550,51 @@ async function closeTicket(guild, ticketId, moderator) {
   return ticket;
 }
 
+async function checkAutoClose(client) {
+  try {
+    const openTickets = await Ticket.find({ status: 'open' });
+    for (const ticket of openTickets) {
+      const guild = client.guilds.cache.get(ticket.guildId);
+      if (!guild) continue;
+      
+      const guildDoc = await GuildModel.findOne({ guildId: ticket.guildId });
+      if (!guildDoc) continue;
+      
+      const settings = resolvePanelSettings(guildDoc, ticket.panelId);
+      if (!settings?.autoCloseEnabled || !settings?.autoCloseMinutes) continue;
+      
+      const channel = guild.channels.cache.get(ticket.channelId)
+        || await guild.channels.fetch(ticket.channelId).catch(() => null);
+      if (!channel) {
+        ticket.status = 'closed';
+        await ticket.save().catch(() => {});
+        continue;
+      }
+      
+      let lastMsgTime = ticket.createdAt || channel.createdAt || Date.now();
+      try {
+        const messages = await channel.messages.fetch({ limit: 1 }).catch(() => null);
+        if (messages && messages.size > 0) {
+          lastMsgTime = messages.first().createdAt;
+        }
+      } catch (err) {
+        // Fallback to ticket.createdAt
+      }
+      
+      const diffMinutes = (Date.now() - new Date(lastMsgTime).getTime()) / 60_000;
+      if (diffMinutes >= settings.autoCloseMinutes) {
+        console.log(`🎫 Auto-closing inactive ticket ${ticket._id} in guild ${guild.name} (inactive for ${Math.round(diffMinutes)} mins)`);
+        const botMember = guild.members.me || await guild.members.fetch(client.user.id).catch(() => null);
+        await closeTicket(guild, ticket._id, botMember || { id: client.user.id }).catch((err) => {
+          console.error(`⚠️ Failed to auto-close ticket ${ticket._id}:`, err.message);
+        });
+      }
+    }
+  } catch (err) {
+    console.error('⚠️ Error checking ticket auto-close:', err);
+  }
+}
+
 module.exports = {
   createTicket,
   claimTicket,
@@ -547,5 +608,6 @@ module.exports = {
   findSub,
   buildOpenPanelPayload,
   buildTicketActionRows,
-  MAX_CUSTOM_BUTTONS_PER_TICKET
+  MAX_CUSTOM_BUTTONS_PER_TICKET,
+  checkAutoClose
 };

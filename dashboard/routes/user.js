@@ -3,6 +3,7 @@ const router = require('../asyncRouter')(express.Router());
 const { PermissionsBitField } = require('discord.js');
 const { ensureAuth } = require('../middleware');
 const BotGuild = require('../../src/models/BotGuild');
+const GuildModel = require('../../src/models/Guild');
 const User = require('../../src/models/User');
 const Wallet = require('../../src/models/Wallet');
 const Transaction = require('../../src/models/Transaction');
@@ -53,39 +54,47 @@ router.get('/servers', ensureAuth, async (req, res) => {
   // Show every server where the logged-in user can manage the server, even when
   // ZETA is NOT installed there yet. This lets the dashboard act as a server
   // picker first, with an "إضافة البوت" action for missing installations.
-  const manageable = userGuilds
+  const rawManageable = userGuilds
     .filter((g) => {
       if (g.owner) return true;
       const perms = new PermissionsBitField(BigInt(g.permissions || 0));
       return perms.has(PermissionsBitField.Flags.Administrator) || perms.has(PermissionsBitField.Flags.ManageGuild);
-    })
-    .map((g) => {
-      const botInfo = botGuildMap.get(g.id);
-      const installed = Boolean(botInfo);
-      
-      let activeChannelCount = null;
-      let memberCount = botInfo?.memberCount ?? null;
-
-      if (installed && discordClient) {
-        const clientGuild = discordClient.guilds.cache.get(g.id);
-        if (clientGuild) {
-          memberCount = clientGuild.memberCount ?? memberCount;
-          activeChannelCount = clientGuild.channels?.cache?.size ?? null;
-        }
-      }
-
-      return {
-        id: g.id,
-        name: g.name,
-        icon: g.icon
-          ? `https://cdn.discordapp.com/icons/${g.id}/${g.icon}.png`
-          : botInfo?.icon || null,
-        owner: g.owner,
-        installed,
-        memberCount,
-        activeChannelCount
-      };
     });
+
+  const manageableIds = rawManageable.map(g => g.id);
+  const dbGuilds = await GuildModel.find({ guildId: { $in: manageableIds } });
+  const dbGuildMap = new Map(dbGuilds.map((g) => [g.guildId, g]));
+
+  const manageable = rawManageable.map((g) => {
+    const botInfo = botGuildMap.get(g.id);
+    const dbGuild = dbGuildMap.get(g.id);
+    const installed = Boolean(botInfo);
+    const isPremium = dbGuild ? Boolean(dbGuild.isPremium) : false;
+    
+    let activeChannelCount = null;
+    let memberCount = botInfo?.memberCount ?? null;
+
+    if (installed && discordClient) {
+      const clientGuild = discordClient.guilds.cache.get(g.id);
+      if (clientGuild) {
+        memberCount = clientGuild.memberCount ?? memberCount;
+        activeChannelCount = clientGuild.channels?.cache?.size ?? null;
+      }
+    }
+
+    return {
+      id: g.id,
+      name: g.name,
+      icon: g.icon
+        ? `https://cdn.discordapp.com/icons/${g.id}/${g.icon}.png`
+        : botInfo?.icon || null,
+      owner: g.owner,
+      installed,
+      memberCount,
+      activeChannelCount,
+      isPremium
+    };
+  });
 
   res.json({
     servers: manageable,

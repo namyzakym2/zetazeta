@@ -344,6 +344,596 @@
     });
   }
 
+  window.openPremiumModal = function() {
+    const activeGuild = window.state?.guild;
+    if (!activeGuild) {
+      toast('الرجاء اختيار سيرفر أولاً لتفعيل الـ Premium!', true);
+      return;
+    }
+
+    if (document.getElementById('premium-payment-modal')) return;
+
+    const modal = document.createElement('div');
+    modal.id = 'premium-payment-modal';
+    modal.className = 'premium-modal-overlay';
+    
+    const esc = v => String(v ?? '').replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m]));
+
+    const styles = `
+      .premium-modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(4, 8, 6, 0.85);
+        backdrop-filter: blur(8px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        direction: rtl;
+        font-family: 'Tajawal', sans-serif;
+        padding: 16px;
+      }
+      .premium-modal-box {
+        background: #0d1512;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+        box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(16, 185, 129, 0.15);
+        border-radius: 20px;
+        width: 100%;
+        max-width: 500px;
+        padding: 24px;
+        position: relative;
+        color: #e5f0ea;
+        animation: premiumFadeIn 0.3s ease-out;
+      }
+      @keyframes premiumFadeIn {
+        from { opacity: 0; transform: scale(0.95); }
+        to { opacity: 1; transform: scale(1); }
+      }
+      .premium-modal-close {
+        position: absolute;
+        top: 16px;
+        left: 16px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        color: #9cb2a6;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        cursor: pointer;
+        font-size: 18px;
+        line-height: 1;
+        transition: all 0.2s;
+      }
+      .premium-modal-close:hover {
+        background: rgba(239, 68, 68, 0.15);
+        color: #ef4444;
+        border-color: rgba(239, 68, 68, 0.3);
+      }
+      .premium-modal-head {
+        text-align: center;
+        margin-bottom: 24px;
+      }
+      .premium-modal-head h2 {
+        font-size: 20px;
+        font-weight: 800;
+        color: #f59e0b;
+        text-shadow: 0 0 12px rgba(245, 158, 11, 0.3);
+        margin: 0 0 6px 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+      }
+      .premium-modal-head p {
+        font-size: 13px;
+        color: #9cb2a6;
+        margin: 0;
+      }
+      .plan-selector {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 20px;
+      }
+      .plan-card {
+        flex: 1;
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 12px;
+        padding: 14px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.2s;
+        position: relative;
+      }
+      .plan-card:hover {
+        background: rgba(16, 185, 129, 0.04);
+        border-color: rgba(16, 185, 129, 0.3);
+      }
+      .plan-card.active {
+        background: rgba(16, 185, 129, 0.08);
+        border-color: #10b981;
+        box-shadow: 0 0 15px rgba(16, 185, 129, 0.2);
+      }
+      .plan-card input {
+        position: absolute;
+        opacity: 0;
+      }
+      .plan-card h3 {
+        font-size: 15px;
+        font-weight: 700;
+        margin: 0 0 4px 0;
+        color: #fff;
+      }
+      .plan-card .price {
+        font-size: 18px;
+        font-weight: 800;
+        color: #10b981;
+      }
+      .plan-card .badge {
+        position: absolute;
+        top: -10px;
+        right: 10px;
+        background: #f59e0b;
+        color: #000;
+        font-size: 9px;
+        font-weight: 800;
+        padding: 2px 6px;
+        border-radius: 8px;
+      }
+      .credit-card-form {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+      }
+      .card-input-group {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .card-input-group label {
+        font-size: 12.5px;
+        font-weight: 700;
+        color: #e5f0ea;
+      }
+      .card-input-wrapper {
+        position: relative;
+        display: flex;
+        align-items: center;
+      }
+      .card-input-wrapper input {
+        width: 100%;
+        height: 44px;
+        background: rgba(0, 0, 0, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        padding: 0 14px;
+        font-family: inherit;
+        font-size: 14px;
+        color: #fff;
+        transition: all 0.2s;
+      }
+      .card-input-wrapper input:focus {
+        border-color: #10b981;
+        background: rgba(0, 0, 0, 0.4);
+        outline: none;
+        box-shadow: 0 0 10px rgba(16, 185, 129, 0.15);
+      }
+      .card-brand-icon {
+        position: absolute;
+        left: 14px;
+        width: 32px;
+        height: 20px;
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: center;
+        opacity: 0.5;
+        transition: opacity 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .card-brand-icon svg {
+        width: 100%;
+        height: 100%;
+      }
+      .card-row-h {
+        display: flex;
+        gap: 12px;
+      }
+      .pay-btn {
+        width: 100%;
+        height: 46px;
+        background: linear-gradient(135deg, #f59e0b, #d97706);
+        color: #000;
+        border: 0;
+        border-radius: 10px;
+        font-weight: 800;
+        font-size: 14.5px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        margin-top: 10px;
+        box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+        transition: all 0.2s;
+      }
+      .pay-btn:hover {
+        background: linear-gradient(135deg, #fbbf24, #f59e0b);
+        box-shadow: 0 6px 20px rgba(245, 158, 11, 0.5);
+      }
+      .pay-btn:disabled {
+        background: rgba(255, 255, 255, 0.05);
+        color: #637a6e;
+        cursor: not-allowed;
+        box-shadow: none;
+      }
+      .secure-badge {
+        text-align: center;
+        font-size: 11px;
+        color: #637a6e;
+        margin-top: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+      }
+      .secure-badge svg {
+        width: 12px;
+        height: 12px;
+      }
+      .processing-view {
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 10px;
+        text-align: center;
+      }
+      .premium-spinner {
+        width: 50px;
+        height: 50px;
+        border: 4px solid rgba(245, 158, 11, 0.1);
+        border-top-color: #f59e0b;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin-bottom: 24px;
+      }
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+      .success-view {
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 30px 10px;
+        text-align: center;
+      }
+      .success-check-wrapper {
+        width: 70px;
+        height: 70px;
+        background: rgba(16, 185, 129, 0.1);
+        border: 2px solid #10b981;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        margin-bottom: 20px;
+        color: #10b981;
+        font-size: 32px;
+        animation: successScale 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      }
+      @keyframes successScale {
+        from { transform: scale(0.5); opacity: 0; }
+        to { transform: scale(1); opacity: 1; }
+      }
+    `;
+
+    let styleTag = document.getElementById('premium-modal-styles');
+    if (!styleTag) {
+      styleTag = document.createElement('style');
+      styleTag.id = 'premium-modal-styles';
+      styleTag.innerHTML = styles;
+      document.head.appendChild(styleTag);
+    }
+
+    const visaSvg = `<svg viewBox="0 0 24 24" width="24" height="24"><path d="M19.117 17.5H22L20.211 6.5h-2.883zm-5.06-11c-1.397 0-2.327.761-2.336 1.832-.008.784.717 1.22 1.264 1.481.56.268.749.44.747.679-.005.367-.453.535-.873.535-.584 0-.898-.088-1.373-.294l-.193-.092-.206 1.25c.346.155.986.29 1.64.296 1.547 0 2.553-.746 2.569-1.9.011-.632-.387-1.115-1.238-1.512-.513-.255-.831-.425-.828-.682.004-.251.294-.515.93-.515a2.91 2.91 0 0 1 1.217.234l.145.067.2-.1.21-1.276a4.27 4.27 0 0 0-1.42-.236zM7.18 6.5a1.442 1.442 0 0 0-1.365.934L2.008 17.5H4.9l.575-1.565h3.534l.334 1.565h2.541zm1.228 6.5H6.382l1.01-2.733L8.408 13zm8.795-6.5h-2.222a.965.965 0 0 0-.909.584L12.5 17.5h2.89L16 14.545l.135-.615h3.111l.295 3.57H22.42l-.715-11H17.203zm-.888 1.411 1.631 7.239h-1.631z" fill="#3b82f6"/></svg>`;
+    const mastercardSvg = `<svg viewBox="0 0 24 24" width="24" height="24"><circle cx="8" cy="12" r="7" fill="#ef4444" opacity="0.85"/><circle cx="16" cy="12" r="7" fill="#f59e0b" opacity="0.85"/><path d="M12 12m-3.5 0a3.5 3.5 0 0 1 7 0" fill="#f59e0b"/></svg>`;
+    const genericCardSvg = `<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>`;
+
+    modal.innerHTML = `
+      <div class="premium-modal-box" id="premium-modal-box">
+        <button type="button" class="premium-modal-close" id="premium-modal-close-btn" aria-label="إغلاق">&times;</button>
+        
+        <div id="premium-form-view">
+          <div class="premium-modal-head">
+            <h2>💎 تفعيل ZETA Premium</h2>
+            <p>سيرفر الحالي: <strong>\${esc(activeGuild.name)}</strong></p>
+          </div>
+
+          <div style="display: flex; gap: 8px; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 12px;">
+            <button id="tab-stripe" class="pay-tab-btn active">💳 بوابة Stripe الحقيقية</button>
+            <button id="tab-simulator" class="pay-tab-btn">🧪 محاكي الدفع السريع</button>
+          </div>
+          
+          <div class="plan-selector">
+            <div class="plan-card active" id="plan-monthly">
+              <input type="radio" name="premium-plan" value="monthly" checked>
+              <h3>الباقة الشهرية</h3>
+              <div class="price">5$ <span style="font-size: 11px; color: #9cb2a6;">/ شهر</span></div>
+            </div>
+            <div class="plan-card" id="plan-yearly">
+              <span class="badge">خصم 20%</span>
+              <input type="radio" name="premium-plan" value="yearly">
+              <h3>الباقة السنوية</h3>
+              <div class="price">49$ <span style="font-size: 11px; color: #9cb2a6;">/ سنة</span></div>
+            </div>
+          </div>
+
+          <!-- Stripe Checkout Mode -->
+          <div id="stripe-mode-container" style="display: flex; flex-direction: column; gap: 14px;">
+            <p style="font-size: 13.5px; color: #9cb2a6; line-height: 1.6; margin: 0; text-align: center;">
+              سيتم توجيهك إلى صفحة الدفع الآمنة الخاصة بـ <strong>Stripe</strong> لإتمام معالجة الدفع ببطاقتك بشكل مشفر ومؤمن بالكامل.
+            </p>
+            <button type="button" class="pay-btn" id="stripe-checkout-btn" style="background: linear-gradient(135deg, #635bff, #4f46e5); color: #fff; box-shadow: 0 4px 15px rgba(99, 91, 255, 0.3);">
+              <span>الانتقال لصفحة Stripe الآمنة (5$) 🔒</span>
+            </button>
+          </div>
+          
+          <!-- Local Card Simulator Mode -->
+          <form class="credit-card-form" id="premium-card-form" style="display: none;">
+            <div class="card-input-group">
+              <label>الاسم على البطاقة</label>
+              <div class="card-input-wrapper">
+                <input type="text" id="card-holder" placeholder="John Doe" autocomplete="cc-name">
+              </div>
+            </div>
+            
+            <div class="card-input-group">
+              <label>رقم البطاقة مباشرة (Visa / Mastercard)</label>
+              <div class="card-input-wrapper">
+                <input type="text" id="card-number" placeholder="4444 4444 4444 4444" maxlength="19" autocomplete="cc-number" style="padding-left: 54px;">
+                <div class="card-brand-icon" id="card-brand-icon-wrapper">${genericCardSvg}</div>
+              </div>
+            </div>
+            
+            <div class="card-row-h">
+              <div class="card-input-group" style="flex: 1;">
+                <label>تاريخ الانتهاء</label>
+                <div class="card-input-wrapper">
+                  <input type="text" id="card-expiry" placeholder="MM/YY" maxlength="5" autocomplete="cc-exp">
+                </div>
+              </div>
+              <div class="card-input-group" style="flex: 1;">
+                <label>رمز الأمان (CVV)</label>
+                <div class="card-input-wrapper">
+                  <input type="password" id="card-cvv" placeholder="123" maxlength="3" autocomplete="cc-csc">
+                </div>
+              </div>
+            </div>
+            
+            <button type="submit" class="pay-btn" id="premium-submit-btn">
+              <span>إتمام الدفع الآمن بقيمة 5$ 🔒</span>
+            </button>
+          </form>
+          
+          <div class="secure-badge">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+            <span>مشفر بالكامل وآمن 256-Bit SSL Connection</span>
+          </div>
+        </div>
+        
+        <div class="processing-view" id="premium-processing-view">
+          <div class="premium-spinner"></div>
+          <h2 id="processing-view-title" style="font-size: 18px; font-weight: 700; color: #fff; margin-bottom: 8px;">جاري معالجة الدفع الآمن...</h2>
+          <p style="font-size: 13px; color: #9cb2a6;">الرجاء عدم إغلاق الصفحة أو إعادة التحميل، نقوم بالتحقق من عملية التفويض لدى البنك المصدر للبطاقة.</p>
+        </div>
+        
+        <div class="success-view" id="premium-success-view">
+          <div class="success-check-wrapper">✓</div>
+          <h2 style="font-size: 22px; font-weight: 800; color: #10b981; margin-bottom: 12px; text-shadow: 0 0 12px rgba(16,185,129,0.3);">تم تفعيل Premium بنجاح!</h2>
+          <p id="success-message-text" style="font-size: 14.5px; color: #e5f0ea; margin: 0 0 24px 0; line-height: 1.6;"></p>
+          <button type="button" class="v-btn primary" id="premium-success-done-btn" style="padding: 0 32px; font-weight: 800; border-radius: 12px;">رائع، شكراً لك! 🤩</button>
+        </div>
+      </div>
+    \`;
+
+
+    document.body.appendChild(modal);
+
+    const closeBtn = document.getElementById('premium-modal-close-btn');
+    const formView = document.getElementById('premium-form-view');
+    const processingView = document.getElementById('premium-processing-view');
+    const successView = document.getElementById('premium-success-view');
+    
+    const planMonthly = document.getElementById('plan-monthly');
+    const planYearly = document.getElementById('plan-yearly');
+    
+    const tabStripe = document.getElementById('tab-stripe');
+    const tabSimulator = document.getElementById('tab-simulator');
+    const stripeContainer = document.getElementById('stripe-mode-container');
+    const cardForm = document.getElementById('premium-card-form');
+    
+    const stripeCheckoutBtn = document.getElementById('stripe-checkout-btn');
+    const payBtnText = document.querySelector('#premium-submit-btn span');
+    
+    const cardNumInput = document.getElementById('card-number');
+    const cardBrandIcon = document.getElementById('card-brand-icon-wrapper');
+    const cardExpiry = document.getElementById('card-expiry');
+    const cardCvv = document.getElementById('card-cvv');
+
+    const closeModal = () => { modal.remove(); };
+    closeBtn.onclick = closeModal;
+
+    let selectedPlan = 'monthly';
+    
+    const updatePricesText = () => {
+      const valText = selectedPlan === 'yearly' ? '49' : '5';
+      payBtnText.textContent = `إتمام الدفع الآمن بقيمة ${valText}$ 🔒`;
+      stripeCheckoutBtn.querySelector('span').textContent = `الانتقال لصفحة Stripe الآمنة (${valText}$) 🔒`;
+    };
+
+    planMonthly.onclick = () => {
+      planMonthly.classList.add('active');
+      planYearly.classList.remove('active');
+      planMonthly.querySelector('input').checked = true;
+      selectedPlan = 'monthly';
+      updatePricesText();
+    };
+    planYearly.onclick = () => {
+      planYearly.classList.add('active');
+      planMonthly.classList.remove('active');
+      planYearly.querySelector('input').checked = true;
+      selectedPlan = 'yearly';
+      updatePricesText();
+    };
+
+    tabStripe.onclick = () => {
+      tabStripe.classList.add('active');
+      tabSimulator.classList.remove('active');
+      stripeContainer.style.display = 'flex';
+      cardForm.style.display = 'none';
+    };
+
+    tabSimulator.onclick = () => {
+      tabSimulator.classList.add('active');
+      tabStripe.classList.remove('active');
+      cardForm.style.display = 'flex';
+      stripeContainer.style.display = 'none';
+    };
+
+    // Stripe Checkout Action
+    stripeCheckoutBtn.onclick = async () => {
+      formView.style.display = 'none';
+      closeBtn.style.display = 'none';
+      document.getElementById('processing-view-title').textContent = 'جاري تحضير بوابة الدفع الآمنة...';
+      processingView.style.display = 'flex';
+
+      try {
+        const response = await fetch(`/admin/${activeGuild.id}/premium/stripe-checkout`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ plan: selectedPlan })
+        });
+        
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || 'فشلت معالجة الطلب.');
+        
+        // Redirect to Stripe checkout page
+        window.location.href = data.url;
+      } catch (err) {
+        processingView.style.display = 'none';
+        formView.style.display = 'block';
+        closeBtn.style.display = 'grid';
+        toast(err.message, true);
+      }
+    };
+
+    cardNumInput.oninput = (e) => {
+      let val = cardNumInput.value.replace(/\D/g, '');
+      let formatted = '';
+      for (let i = 0; i < val.length; i++) {
+        if (i > 0 && i % 4 === 0) formatted += ' ';
+        formatted += val[i];
+      }
+      cardNumInput.value = formatted;
+
+      if (val.startsWith('4')) {
+        cardBrandIcon.innerHTML = visaSvg;
+        cardBrandIcon.style.opacity = '1';
+      } else if (val.startsWith('5')) {
+        cardBrandIcon.innerHTML = mastercardSvg;
+        cardBrandIcon.style.opacity = '1';
+      } else {
+        cardBrandIcon.innerHTML = genericCardSvg;
+        cardBrandIcon.style.opacity = '0.5';
+      }
+    };
+
+    cardExpiry.oninput = (e) => {
+      let val = cardExpiry.value.replace(/\D/g, '');
+      if (val.length > 2) {
+        cardExpiry.value = val.slice(0, 2) + '/' + val.slice(2, 4);
+      } else {
+        cardExpiry.value = val;
+      }
+    };
+
+    cardCvv.oninput = (e) => {
+      cardCvv.value = cardCvv.value.replace(/\D/g, '');
+    };
+
+    cardForm.onsubmit = async (e) => {
+      e.preventDefault();
+      const holder = document.getElementById('card-holder').value.trim();
+      const num = cardNumInput.value;
+      const exp = cardExpiry.value;
+      const cvv = cardCvv.value;
+
+      if (!holder || num.replace(/\s/g, '').length < 13 || exp.length < 5 || cvv.length < 3) {
+        toast('الرجاء التأكد من صحة بيانات البطاقة قبل المتابعة.', true);
+        return;
+      }
+
+      formView.style.display = 'none';
+      closeBtn.style.display = 'none';
+      document.getElementById('processing-view-title').textContent = 'جاري معالجة الدفع الآمن...';
+      processingView.style.display = 'flex';
+
+      try {
+        const response = await fetch(`/admin/${activeGuild.id}/premium/pay`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            cardholderName: holder,
+            cardNumber: num,
+            expiryDate: exp,
+            cvv: cvv,
+            plan: selectedPlan
+          })
+        });
+
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || 'فشلت عملية الدفع.');
+
+        processingView.style.display = 'none';
+        successView.style.display = 'flex';
+        
+        document.getElementById('success-message-text').textContent = 
+          `مبروك يا صاحبي! تم تفعيل اشتراك ZETA Premium بنجاح لسيرفر ${activeGuild.name}. تم تمكين جميع الصلاحيات والميزات الفاخرة لك ولأعضاء سيرفرك.`;
+
+        activeGuild.isPremium = true;
+        if (window.state && Array.isArray(window.state.servers)) {
+          const matched = window.state.servers.find(s => s.id === activeGuild.id);
+          if (matched) matched.isPremium = true;
+        }
+
+        toast('تم تفعيل ZETA Premium بنجاح! 💎');
+
+        if (window.renderServerPicker) window.renderServerPicker();
+        if (window.renderShell) window.renderShell();
+        
+        document.getElementById('premium-success-done-btn').onclick = () => {
+          closeModal();
+          if (window.loadPage && window.state?.activePage) {
+            window.loadPage(window.state.activePage);
+          } else {
+            location.reload();
+          }
+        };
+
+      } catch (err) {
+        processingView.style.display = 'none';
+        formView.style.display = 'block';
+        closeBtn.style.display = 'grid';
+        toast(err.message, true);
+      }
+    };
+
+  };
+
   function boot() {
     hydrateIcons();
 
@@ -352,7 +942,7 @@
     document.getElementById('vxScrim')?.addEventListener('click', () => setDrawer(false));
     document.getElementById('vxTabMore')?.addEventListener('click', () => setDrawer(true));
     document.querySelectorAll('.vx-tabbar [data-tab]').forEach((b) => b.addEventListener('click', () => window.selectTab && window.selectTab(b.dataset.tab)));
-    document.querySelectorAll('[data-vx-soon]').forEach((b) => b.addEventListener('click', () => toast('باقات Premium قادمة قريباً')));
+    document.querySelectorAll('[data-vx-soon]').forEach((b) => b.addEventListener('click', () => window.openPremiumModal && window.openPremiumModal()));
 
     document.getElementById('globalSearch')?.addEventListener('click', openPalette);
     document.getElementById('vxPalette')?.addEventListener('click', (e) => {
